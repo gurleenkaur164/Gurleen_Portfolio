@@ -17,17 +17,51 @@
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
+    <a href="#top" class="skip-link">Skip to content</a>
+
     <div class="grain" aria-hidden="true"></div>
     <div class="vignette" aria-hidden="true"></div>
 
+    <div class="progress" aria-hidden="true"><span class="progress__bar"></span></div>
+
     <header class="nav">
-      <a href="#top" class="nav__mark">GK</a>
+      <a href="#top" class="nav__mark" data-magnetic>GK</a>
       <nav class="nav__links">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+        <a href="#work" data-magnetic>Work</a>
+        <a href="#about" data-magnetic>About</a>
+        <a href="#contact" data-magnetic>Contact</a>
+        <button
+          type="button"
+          id="palette-trigger"
+          class="nav__cmdk"
+          data-magnetic
+          aria-haspopup="dialog"
+          aria-controls="palette"
+        >
+          <span>Search</span><kbd>⌘K</kbd>
+        </button>
       </nav>
     </header>
+
+    <!-- ───────────────────────── command palette ───────────────────────── -->
+    <div id="palette" class="palette" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+      <div class="palette__backdrop" data-palette-close></div>
+      <div class="palette__panel">
+        <div class="palette__input-row">
+          <span class="palette__prompt" aria-hidden="true">›</span>
+          <input
+            id="palette-input"
+            class="palette__input"
+            type="text"
+            placeholder="Jump to a section, or run a command…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <kbd class="palette__esc">esc</kbd>
+        </div>
+        <ul id="palette-list" class="palette__list" role="listbox"></ul>
+      </div>
+    </div>
 
     <main id="top">
       <!-- ───────────────────────── hero ───────────────────────── -->
@@ -60,7 +94,7 @@
             pipelines, retrieval stacks, and the full-stack surfaces around
             them.
           </p>
-          <div class="hero__scroll reveal">
+          <div class="hero__scroll reveal" data-magnetic>
             <span class="hero__scroll-line"></span>
             <span>Scroll</span>
           </div>
@@ -111,7 +145,7 @@
         <ol class="projects">
           <li class="project reveal" data-tint="#8c4a32">
             <a
-              class="project__link"
+              class="project__link" data-tilt data-cursor-label="View"
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -135,7 +169,7 @@
 
           <li class="project reveal" data-tint="#3f5a4a">
             <a
-              class="project__link"
+              class="project__link" data-tilt data-cursor-label="View"
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -158,7 +192,7 @@
 
           <li class="project reveal" data-tint="#6b4a63">
             <a
-              class="project__link"
+              class="project__link" data-tilt data-cursor-label="View"
               href="https://github.com/gurleenkaur164/CareerPathRecommendor"
               target="_blank"
               rel="noreferrer noopener"
@@ -180,7 +214,7 @@
 
           <li class="project reveal" data-tint="#7a5233">
             <a
-              class="project__link"
+              class="project__link" data-tilt data-cursor-label="View"
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -203,7 +237,7 @@
 
           <li class="project reveal" data-tint="#3f5566">
             <a
-              class="project__link"
+              class="project__link" data-tilt data-cursor-label="View"
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -337,10 +371,20 @@
         </p>
 
         <div class="contact__links">
-          <a class="clink reveal" href="mailto:gk0370435@gmail.com">
-            <span class="clink__k">Email</span>
-            <span class="clink__v">gk0370435@gmail.com</span>
-          </a>
+          <div class="clink reveal">
+            <a class="clink__main" href="mailto:gk0370435@gmail.com">
+              <span class="clink__k">Email</span>
+              <span class="clink__v">gk0370435@gmail.com</span>
+            </a>
+            <button
+              type="button"
+              class="clink__copy"
+              data-copy="gk0370435@gmail.com"
+              aria-label="Copy email address"
+            >
+              Copy
+            </button>
+          </div>
           <a
             class="clink reveal"
             href="https://github.com/gurleenkaur164"

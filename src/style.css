@@ -58,6 +58,47 @@ a {
   text-decoration: none;
 }
 
+/* ── skip link ────────────────────────────────────────────────────────── */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--rust);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  transition: top 0.3s var(--ease);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ── scroll progress ──────────────────────────────────────────────────── */
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: 2px;
+  background: var(--ink-08);
+}
+
+.progress__bar {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--rust);
+  transform-origin: left;
+  /* width is rewritten every frame by JS; no transition, or fast scrolling
+     visibly lags the bar behind the page */
+}
+
 /* a warm bloom behind the portrait so the dark isn't a flat void */
 .vignette {
   position: fixed;
@@ -171,6 +212,183 @@ main,
 .nav__links a:hover::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+
+/* scrollspy: the section currently in view gets the underline without a
+   hover, so nav always tells you where you are */
+.nav__links a.is-active {
+  color: var(--rust);
+}
+
+.nav__links a.is-active::after {
+  background: var(--rust);
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.nav__cmdk {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  padding: 0.35rem 0.5rem 0.35rem 0.8rem;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.4s var(--ease), color 0.4s var(--ease);
+}
+
+.nav__cmdk:hover {
+  color: var(--ink);
+  border-color: var(--ink-18);
+}
+
+.nav__cmdk kbd {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  background: var(--ink-08);
+  border: 1px solid var(--ink-18);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  color: var(--ink-70);
+}
+
+@media (max-width: 700px) {
+  .nav__cmdk span {
+    display: none;
+  }
+}
+
+/* ── command palette ──────────────────────────────────────────────────── */
+.palette {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: min(16vh, 140px);
+}
+
+.palette[hidden] {
+  display: none;
+}
+
+.palette__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 9, 7, 0.72);
+  backdrop-filter: blur(3px);
+  animation: palette-fade 0.25s var(--ease);
+}
+
+.palette__panel {
+  position: relative;
+  width: min(560px, calc(100vw - 2.5rem));
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: 1px solid var(--ink-18);
+  border-radius: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: palette-in 0.28s var(--ease);
+}
+
+@keyframes palette-fade {
+  from { opacity: 0; }
+}
+
+@keyframes palette-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+}
+
+.palette__input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-bottom: var(--rule);
+}
+
+.palette__prompt {
+  color: var(--rust);
+  font-family: var(--mono);
+}
+
+.palette__input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+
+.palette__input::placeholder {
+  color: var(--ink-45);
+}
+
+.palette__esc {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--ink-45);
+  border: 1px solid var(--ink-18);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+}
+
+.palette__list {
+  list-style: none;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.palette__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ink-70);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.palette__item-label {
+  font-size: 0.9rem;
+}
+
+.palette__item-hint {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.palette__item.is-selected {
+  background: var(--ink-08);
+  color: var(--ink);
+}
+
+.palette__item.is-selected .palette__item-hint {
+  color: var(--rust);
+}
+
+.palette__empty {
+  padding: 1.5rem 0.75rem;
+  text-align: center;
+  color: var(--ink-45);
+  font-size: 0.85rem;
 }
 
 /* ── shared type ──────────────────────────────────────────────────────── */
@@ -629,7 +847,7 @@ main,
 
 .clink {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 2rem;
   padding: 1.5rem 0;
@@ -644,6 +862,42 @@ main,
 .clink:hover {
   padding-left: 1.25rem;
   color: var(--rust);
+}
+
+/* the email row is a div wrapping a link + a copy button, everything
+   else is still a plain <a>.clink — .clink__main takes over the link's
+   old flex role so both markups line up visually */
+.clink__main {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.clink__copy {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  background: none;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.clink__copy:hover {
+  color: var(--ink);
+  border-color: var(--ink-45);
+}
+
+.clink__copy.is-copied {
+  color: var(--rust);
+  border-color: var(--rust);
 }
 
 .clink__k {
@@ -792,4 +1046,117 @@ main,
 :focus-visible {
   outline: 2px solid var(--rust);
   outline-offset: 3px;
+}
+
+/* ── custom cursor ────────────────────────────────────────────────────── */
+/* injected by JS only on fine-pointer, motion-ok devices — see main.js.
+   Never rendered on touch: cursor.js checks matchMedia before creating these. */
+.has-custom-cursor {
+  cursor: none;
+}
+
+.has-custom-cursor a,
+.has-custom-cursor button {
+  cursor: none;
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 95;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--rust);
+  transition: opacity 0.2s ease;
+}
+
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ink-45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.28s var(--ease), height 0.28s var(--ease),
+    border-color 0.28s var(--ease), background 0.28s var(--ease);
+}
+
+.cursor-ring__label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
+}
+
+/* hovering something interactive: ring grows, dot hides */
+.cursor-ring.is-hover {
+  width: 56px;
+  height: 56px;
+  border-color: transparent;
+  background: var(--rust);
+}
+
+.cursor-ring.is-hover .cursor-ring__label {
+  opacity: 1;
+}
+
+.cursor-dot.is-hidden {
+  opacity: 0;
+}
+
+/* ── magnetic elements ────────────────────────────────────────────────── */
+[data-magnetic] {
+  transition: transform 0.35s var(--ease);
+}
+
+/* ── project tilt + spotlight ─────────────────────────────────────────── */
+/* tilt is a plain transform set by JS (perspective lives on the list so
+   children keep their own stacking/hover context); the spotlight is a
+   radial gradient tracking the cursor, tinted per-project via --tint. */
+.projects {
+  perspective: 1400px;
+}
+
+.project__link {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.project__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 8px;
+  opacity: 0;
+  background: radial-gradient(
+    320px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--tint, var(--rust)) 16%, transparent),
+    transparent 70%
+  );
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+
+.project__link:hover::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  .project__link {
+    transform: none !important;
+  }
 }
