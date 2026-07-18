@@ -33,6 +33,12 @@ const SPAN = 6.0; // world units the portrait occupies
 const CELL = SPAN / GRID; // one grid cell, in world units
 const FOV = 38;
 
+// read a CSS custom property as a three Color, falling back if unset
+function cssColor(varName, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return new Color(v || fallback);
+}
+
 export function createPortrait(canvas, src) {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -100,11 +106,14 @@ export function createPortrait(canvas, src) {
       // framebuffer pixels per grid cell — recomputed on resize so points
       // always track their own cell instead of a hardcoded pixel size
       uCellPx: { value: 2 },
-      // lifted off the page background (#14120F) on purpose — her hair is the
-      // darkest region, and mapping it to the bg colour would erase her.
-      uDark: { value: new Color("#5b3529") },
-      uEmber: { value: new Color("#C2703F") },
-      uBone: { value: new Color("#E8E3D9") },
+      // Duotone stops read from CSS variables so the theme system is the
+      // single source of truth (see --portrait-shadow/mid/hi). Fallbacks are
+      // the dark-theme values. Shadow is lifted off the page background on
+      // purpose — her hair is the darkest region, and mapping it to the bg
+      // colour would erase her.
+      uDark: { value: cssColor("--portrait-shadow", "#5b3529") },
+      uEmber: { value: cssColor("--portrait-mid", "#C2703F") },
+      uBone: { value: cssColor("--portrait-hi", "#E8E3D9") },
     },
     vertexShader: /* glsl */ `
       uniform sampler2D uTex;
@@ -295,7 +304,15 @@ export function createPortrait(canvas, src) {
   };
   document.addEventListener("visibilitychange", onVis);
 
-  return () => {
+  // re-read the duotone stops from CSS — called by the theme toggle so the
+  // portrait re-tones to match paper/ink instead of espresso/bone
+  const retint = () => {
+    mat.uniforms.uDark.value = cssColor("--portrait-shadow", "#5b3529");
+    mat.uniforms.uEmber.value = cssColor("--portrait-mid", "#C2703F");
+    mat.uniforms.uBone.value = cssColor("--portrait-hi", "#E8E3D9");
+  };
+
+  const destroy = () => {
     cancelAnimationFrame(raf);
     ro.disconnect();
     window.removeEventListener("pointermove", onMove);
@@ -306,4 +323,6 @@ export function createPortrait(canvas, src) {
     tex.dispose();
     renderer.dispose();
   };
+
+  return { retint, destroy };
 }

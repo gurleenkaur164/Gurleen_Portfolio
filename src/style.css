@@ -5,10 +5,34 @@
    ========================================================================== */
 
 :root {
-  /* espresso near-black -> bone, with a single ember accent.
-     everything else is a tint of these three. */
-  --paper: #14120f;
-  --paper-2: #1b1815;
+  /* LIGHT default: soft blush paper, warm plum-black ink, one dusty-rose
+     accent. Warm and hand-mixed — a muted rose, not a hot-pink/AI gradient.
+     Everything else is a tint of these three. */
+  --paper: #f7ece9;
+  --paper-2: #f0dcd6;
+  --ink: #2b1f22;
+  --ink-70: rgba(43, 31, 34, 0.72);
+  --ink-45: rgba(43, 31, 34, 0.5);
+  --ink-18: rgba(43, 31, 34, 0.16);
+  --ink-08: rgba(43, 31, 34, 0.07);
+  --rust: #a8465c;
+
+  --grain-blend: multiply;
+  --grain-opacity: 0.035;
+
+  --serif: "Syne", "Iowan Old Style", Georgia, serif;
+  --sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --pad: clamp(1.25rem, 5vw, 5.5rem);
+  --rule: 1px solid var(--ink-18);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── dark theme: the espresso variant, opt-in via the toggle ───────────── */
+:root[data-theme="dark"] {
+  --paper: #100d0b;
+  --paper-2: #17130f;
   --ink: #e8e3d9;
   --ink-70: rgba(232, 227, 217, 0.66);
   --ink-45: rgba(232, 227, 217, 0.42);
@@ -16,13 +40,19 @@
   --ink-08: rgba(232, 227, 217, 0.07);
   --rust: #c2703f;
 
-  --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
-  --sans: "Inter", system-ui, -apple-system, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --grain-blend: screen;
+  --grain-opacity: 0.05;
+}
 
-  --pad: clamp(1.25rem, 5vw, 5.5rem);
-  --rule: 1px solid var(--ink-18);
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+/* cross-fade themed colours in one sweep instead of a hard cut */
+:root.theme-anim,
+:root.theme-anim body,
+:root.theme-anim .nav,
+:root.theme-anim .section,
+:root.theme-anim .term,
+:root.theme-anim [class*="gh__"] {
+  transition: background-color 0.42s var(--ease), color 0.42s var(--ease),
+    border-color 0.42s var(--ease);
 }
 
 *,
@@ -34,9 +64,27 @@
 }
 
 html {
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Lenis smooth scroll — it drives scroll itself, so native smooth must be off.
+   these are the library's required hooks. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
 }
 
 body {
@@ -99,7 +147,54 @@ a {
      visibly lags the bar behind the page */
 }
 
-/* a warm bloom behind the portrait so the dark isn't a flat void */
+/* ── intro loader ─────────────────────────────────────────────────────── */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  transition: transform 0.72s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.loader.is-done {
+  transform: translateY(-100%);
+}
+
+.loader__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: opacity 0.35s var(--ease), transform 0.72s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.loader.is-done .loader__inner {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.loader__label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.loader__num {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(4rem, 14vw, 10rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* LIGHT default: a barely-there warm wash + soft warm glow behind the avatar,
+   no dark edges. keeps the paper from reading as flat white. */
 .vignette {
   position: fixed;
   inset: 0;
@@ -107,15 +202,23 @@ a {
   pointer-events: none;
   background:
     radial-gradient(
-      62vw 62vw at 72% 32%,
-      rgba(194, 112, 63, 0.13),
-      transparent 62%
+      70vw 70vw at 72% 26%,
+      rgba(164, 78, 41, 0.06),
+      transparent 60%
     ),
     radial-gradient(
-      50vw 50vw at 12% 78%,
-      rgba(232, 227, 217, 0.045),
-      transparent 60%
+      60vw 60vw at 12% 82%,
+      rgba(120, 96, 60, 0.05),
+      transparent 62%
     );
+}
+
+/* DARK: the cinematic espresso bloom + deep edge falloff */
+:root[data-theme="dark"] .vignette {
+  background:
+    radial-gradient(68vw 68vw at 74% 30%, rgba(194, 112, 63, 0.18), transparent 60%),
+    radial-gradient(52vw 52vw at 10% 80%, rgba(184, 137, 74, 0.07), transparent 60%),
+    radial-gradient(120vw 90vh at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 /* film grain — kills the "rendered by a machine" flatness */
@@ -124,8 +227,8 @@ a {
   inset: -50%;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: screen;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   animation: grain 700ms steps(2) infinite;
 }
@@ -134,6 +237,16 @@ a {
   0% { transform: translate(0, 0); }
   50% { transform: translate(-2%, 1.5%); }
   100% { transform: translate(1%, -1%); }
+}
+
+/* ── floating 3D elements canvas ─────────────────────────────────────── */
+#floating-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
 }
 
 main,
@@ -160,7 +273,7 @@ main,
     to bottom,
     var(--paper) 0%,
     var(--paper) 55%,
-    rgba(20, 18, 15, 0.85) 72%,
+    color-mix(in srgb, var(--paper) 85%, transparent) 72%,
     transparent 100%
   );
   pointer-events: none;
@@ -173,7 +286,7 @@ main,
 .nav__mark {
   font-family: var(--serif);
   font-size: 1.15rem;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
@@ -262,6 +375,52 @@ main,
   .nav__cmdk span {
     display: none;
   }
+}
+
+.nav__theme {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-45);
+  cursor: pointer;
+  transition: color 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.nav__theme:hover {
+  color: var(--ink);
+}
+
+.nav__theme-icon {
+  grid-area: 1 / 1;
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--ease);
+}
+
+/* show the icon of the theme you'd switch TO: moon while light, sun while
+   dark — the icon is an affordance for the next state, not the current one */
+.nav__theme-icon--moon { opacity: 0; transform: rotate(-40deg) scale(0.6); }
+.nav__theme-icon--sun  { opacity: 1; transform: none; }
+
+:root[data-theme="light"] .nav__theme-icon--moon { opacity: 1; transform: none; }
+:root[data-theme="light"] .nav__theme-icon--sun  { opacity: 0; transform: rotate(40deg) scale(0.6); }
+
+/* ── section aside (right-aligned note in a section head) ─────────────── */
+.section__aside {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  align-self: center;
+  transition: color 0.3s var(--ease);
+}
+
+a.section__aside:hover {
+  color: var(--rust);
 }
 
 /* ── command palette ──────────────────────────────────────────────────── */
@@ -432,12 +591,11 @@ main,
 
 .hero__title {
   font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(3.2rem, 8.5vw, 8.5rem);
-  line-height: 0.86;
-  letter-spacing: -0.035em;
+  font-weight: 700;
+  font-size: clamp(3.2rem, 9.5vw, 9.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.04em;
   margin: 1.25rem 0 2rem;
-  font-variation-settings: "opsz" 144;
 }
 
 .hero__title .line {
@@ -467,25 +625,32 @@ main,
 }
 
 .hero__role {
-  font-family: var(--serif);
-  font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+  font-family: var(--sans);
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
   line-height: 1.35;
   letter-spacing: -0.01em;
   padding-top: 1.5rem;
   border-top: var(--rule);
 }
 
-/* ── portrait ─────────────────────────────────────────────────────────── */
+/* ── 3D avatar ────────────────────────────────────────────────────────── */
 .hero__portrait {
   position: relative;
-  height: min(62vh, 560px);
-  min-height: 300px;
+  height: min(68vh, 620px);
+  min-height: 320px;
+  /* a soft warm disc floats the avatar off the paper */
+  background: radial-gradient(
+    46% 46% at 50% 42%,
+    color-mix(in srgb, var(--rust) 12%, transparent),
+    transparent 70%
+  );
 }
 
-#portrait {
+#avatar {
   width: 100%;
   height: 100%;
   display: block;
+  cursor: grab;
 }
 
 .hero__portrait-cap {
@@ -557,21 +722,92 @@ main,
   background: var(--paper-2);
 }
 
+/* JS-driven now (motion.js) so it can react to scroll velocity — no CSS
+   animation. will-change keeps the transform on its own layer. */
 .ticker__track {
   display: flex;
   gap: 1.5rem;
   width: max-content;
-  animation: slide 38s linear infinite;
   font-family: var(--mono);
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-45);
   white-space: nowrap;
+  will-change: transform;
 }
 
-@keyframes slide {
-  to { transform: translateX(-50%); }
+/* ── big kinetic marquee ──────────────────────────────────────────────── */
+.bigmarq {
+  overflow: hidden;
+  padding: clamp(2.5rem, 7vw, 6rem) 0;
+  border-top: var(--rule);
+  border-bottom: var(--rule);
+}
+
+.bigmarq__track {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  width: max-content;
+  white-space: nowrap;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 8vw, 7rem);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  will-change: transform;
+}
+
+.bigmarq__star {
+  color: var(--rust);
+  font-size: 0.5em;
+  transform: translateY(-0.1em);
+}
+
+/* ── cursor-following project preview ─────────────────────────────────── */
+.proj-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: clamp(180px, 20vw, 260px);
+  height: clamp(130px, 15vw, 190px);
+  border-radius: 8px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.85;
+  transition: opacity 0.4s var(--ease), scale 0.4s var(--ease);
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--tint, var(--rust)) 85%, #000 15%),
+      color-mix(in srgb, var(--tint, var(--rust)) 45%, #000 55%));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.proj-preview.is-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.proj-preview__idx {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.proj-preview__name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  line-height: 1.05;
+  color: #fff;
 }
 
 /* ── stats ────────────────────────────────────────────────────────────── */
@@ -596,7 +832,7 @@ main,
 .stat__num {
   font-family: var(--serif);
   font-size: clamp(1.9rem, 3.4vw, 3.1rem);
-  font-weight: 300;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -636,7 +872,7 @@ main,
 
 .section__title {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(1.75rem, 4vw, 3rem);
   letter-spacing: -0.02em;
 }
@@ -678,7 +914,7 @@ main,
 
 .project__name {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(1.6rem, 3.4vw, 2.7rem);
   line-height: 1.05;
   letter-spacing: -0.025em;
@@ -749,8 +985,8 @@ main,
 }
 
 .about__prose .lede {
-  font-family: var(--serif);
-  font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+  font-family: var(--sans);
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
   line-height: 1.4;
   letter-spacing: -0.015em;
   color: var(--ink);
@@ -818,7 +1054,7 @@ main,
 .award__name {
   font-family: var(--serif);
   font-size: clamp(1.05rem, 1.9vw, 1.4rem);
-  font-weight: 300;
+  font-weight: 500;
   letter-spacing: -0.015em;
 }
 
@@ -832,7 +1068,7 @@ main,
 /* ── contact ──────────────────────────────────────────────────────────── */
 .contact__lede {
   font-family: var(--serif);
-  font-weight: 300;
+  font-weight: 600;
   font-size: clamp(1.5rem, 3.6vw, 2.75rem);
   line-height: 1.25;
   letter-spacing: -0.025em;
@@ -915,8 +1151,262 @@ main,
 .clink__v {
   font-family: var(--serif);
   font-size: clamp(1.05rem, 2.4vw, 1.75rem);
-  font-weight: 300;
+  font-weight: 500;
   letter-spacing: -0.015em;
+}
+
+/* ── github / open source ─────────────────────────────────────────────── */
+.gh__grid {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.gh__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--ink-18);
+  border: 1px solid var(--ink-18);
+}
+
+.gh__stat {
+  background: var(--paper);
+  padding: clamp(1.5rem, 3vw, 2.4rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 7rem;
+}
+
+.gh__num {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--rust);
+  font-variant-numeric: tabular-nums;
+}
+
+.gh__label {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.gh__skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.gh__skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--ink-08), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s var(--ease) infinite;
+}
+
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}
+
+.gh__panel-title,
+.gh__repos-title {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 1rem;
+}
+
+.gh__langs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.gh__lang {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.gh__lang-name {
+  font-size: 0.82rem;
+  color: var(--ink-70);
+}
+
+.gh__lang-bar {
+  height: 4px;
+  background: var(--ink-08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gh__lang-bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--rust);
+  border-radius: 999px;
+  animation: lang-grow 0.9s var(--ease) forwards;
+}
+
+@keyframes lang-grow {
+  from { transform: scaleX(0); transform-origin: left; }
+}
+
+.gh__repos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--ink-18);
+  border: 1px solid var(--ink-18);
+  margin-top: 2.5rem;
+}
+
+.gh__repo {
+  background: var(--paper);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: background 0.4s var(--ease);
+}
+
+.gh__repo:hover {
+  background: var(--paper-2);
+}
+
+.gh__repo-name {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.gh__repo-desc {
+  font-size: 0.85rem;
+  color: var(--ink-70);
+  line-height: 1.5;
+}
+
+.gh__repo-meta {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  margin-top: 0.3rem;
+}
+
+.gh__error {
+  grid-column: 1 / -1;
+  font-size: 0.9rem;
+  color: var(--ink-70);
+  padding: 1rem 0;
+}
+
+.gh__error a {
+  color: var(--rust);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── terminal ─────────────────────────────────────────────────────────── */
+.term {
+  border: 1px solid var(--ink-18);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper-2);
+  font-family: var(--mono);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+.term__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--ink-18);
+  background: var(--paper);
+}
+
+.term__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink-18);
+}
+
+.term__dot:nth-child(1) { background: color-mix(in srgb, var(--rust) 70%, transparent); }
+
+.term__title {
+  margin-left: 0.6rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-45);
+}
+
+.term__output {
+  padding: 1.25rem 1.25rem 0.5rem;
+  min-height: 240px;
+  max-height: 340px;
+  overflow-y: auto;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.term__line {
+  color: var(--ink-70);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.term__line.is-accent { color: var(--rust); }
+.term__line.is-dim { color: var(--ink-45); }
+.term__line.is-err { color: #d9705a; }
+
+.term__echo {
+  color: var(--ink);
+  margin-top: 0.5rem;
+}
+
+.term__echo .term__prompt {
+  color: var(--rust);
+}
+
+.term__form {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1.25rem 1.25rem;
+}
+
+.term__prompt {
+  color: var(--rust);
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.term__input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  caret-color: var(--rust);
 }
 
 /* ── footer ───────────────────────────────────────────────────────────── */
@@ -936,8 +1426,8 @@ main,
 /* ── reveal ───────────────────────────────────────────────────────────── */
 .reveal:not(.hero__title) {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.95s var(--ease), transform 0.95s var(--ease);
+  transform: translateY(40px);
+  transition: opacity 1.05s var(--ease), transform 1.05s var(--ease);
 }
 
 .reveal.is-in:not(.hero__title) {
@@ -1009,6 +1499,18 @@ main,
   .clink {
     flex-direction: column;
     gap: 0.4rem;
+  }
+
+  .gh__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gh__repos {
+    grid-template-columns: 1fr;
+  }
+
+  .section__aside {
+    display: none;
   }
 }
 

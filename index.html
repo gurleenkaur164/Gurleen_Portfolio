@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gurleen Kaur — Software & AI Engineer</title>
+    <title>Gurleen Kaur | Software & AI Engineer</title>
     <meta
       name="description"
-      content="Gurleen Kaur — software and scalable systems engineer building agentic AI and full-stack platforms."
+      content="Gurleen Kaur | Software and scalable systems engineer building agentic AI and full-stack platforms."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/style.css" />
@@ -19,8 +19,17 @@
   <body>
     <a href="#top" class="skip-link">Skip to content</a>
 
-    <div class="grain" aria-hidden="true"></div>
+    <!-- ───────────────────────── intro loader ───────────────────────── -->
+    <div id="loader" class="loader" aria-hidden="true">
+      <div class="loader__inner">
+        <span class="loader__label">Gurleen Kaur</span>
+        <span class="loader__num">000</span>
+      </div>
+      <div class="loader__curtain"></div>
+    </div>
+
     <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
 
     <div class="progress" aria-hidden="true"><span class="progress__bar"></span></div>
 
@@ -39,6 +48,24 @@
           aria-controls="palette"
         >
           <span>Search</span><kbd>⌘K</kbd>
+        </button>
+        <button
+          type="button"
+          id="theme-toggle"
+          class="nav__theme"
+          data-magnetic
+          aria-label="Toggle light and dark theme"
+          aria-pressed="false"
+        >
+          <svg class="nav__theme-icon nav__theme-icon--sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.5" fill="currentColor" />
+            <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19" />
+            </g>
+          </svg>
+          <svg class="nav__theme-icon nav__theme-icon--moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M20 14.5A8 8 0 1 1 9.5 4a6.3 6.3 0 0 0 10.5 10.5Z" fill="currentColor" />
+          </svg>
         </button>
       </nav>
     </header>
@@ -59,16 +86,19 @@
           />
           <kbd class="palette__esc">esc</kbd>
         </div>
-        <ul id="palette-list" class="palette__list" role="listbox"></ul>
+        <ul id="palette-list" class="palette__list" role="listbox" data-lenis-prevent></ul>
       </div>
     </div>
 
     <main id="top">
       <!-- ───────────────────────── hero ───────────────────────── -->
       <section class="hero">
-        <div class="hero__grid">
+        <canvas id="avatar"></canvas>
+        <span class="hero__portrait-cap" data-avatar-hint>loading…</span>
+
+        <div class="hero__content">
           <div class="hero__copy">
-            <p class="eyebrow reveal">Patiala, India — b. 2003</p>
+            <p class="eyebrow reveal">Patiala, India · b. 2004</p>
 
             <h1 class="hero__title reveal">
               <span class="line"><span>Gurleen</span></span>
@@ -80,17 +110,12 @@
               <span class="dim">building agentic AI that does real work</span>
             </p>
           </div>
-
-          <div class="hero__portrait reveal">
-            <canvas id="portrait"></canvas>
-            <span class="hero__portrait-cap">drag your cursor across</span>
-          </div>
         </div>
 
         <div class="hero__foot">
           <p class="hero__blurb reveal">
             Final-year Electronics &amp; Computer Engineering at Thapar
-            Institute. I build systems that hold up under load — multi-agent
+            Institute. I build systems that hold up under load, multi-agent
             pipelines, retrieval stacks, and the full-stack surfaces around
             them.
           </p>
@@ -102,8 +127,8 @@
       </section>
 
       <!-- ───────────────────────── marquee ───────────────────────── -->
-      <div class="ticker" aria-hidden="true">
-        <div class="ticker__track">
+      <div class="ticker" aria-hidden="true" data-marquee="0.5">
+        <div class="ticker__track marquee__track">
           <span>Agentic AI</span><span>·</span><span>LangChain</span><span>·</span>
           <span>FastAPI</span><span>·</span><span>Next.js</span><span>·</span>
           <span>RAG</span><span>·</span><span>MCP</span><span>·</span>
@@ -145,7 +170,7 @@
         <ol class="projects">
           <li class="project reveal" data-tint="#8c4a32">
             <a
-              class="project__link" data-tilt data-cursor-label="View"
+              class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -157,7 +182,7 @@
                   An agentic copilot for government scheme access. Rural CSC
                   operators describe a citizen in plain language and get matched
                   welfare schemes plus a localised Hindi/Punjabi document
-                  checklist — a five-stage agent pipeline over 1000+ schemes.
+                  checklist. A five-stage agent pipeline over 1000+ schemes.
                 </p>
                 <ul class="project__tags">
                   <li>Llama 3</li><li>FastAPI</li><li>Next.js</li><li>PostgreSQL</li>
@@ -169,7 +194,7 @@
 
           <li class="project reveal" data-tint="#3f5a4a">
             <a
-              class="project__link" data-tilt data-cursor-label="View"
+              class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -192,7 +217,7 @@
 
           <li class="project reveal" data-tint="#6b4a63">
             <a
-              class="project__link" data-tilt data-cursor-label="View"
+              class="project__link" data-tilt
               href="https://github.com/gurleenkaur164/CareerPathRecommendor"
               target="_blank"
               rel="noreferrer noopener"
@@ -214,7 +239,7 @@
 
           <li class="project reveal" data-tint="#7a5233">
             <a
-              class="project__link" data-tilt data-cursor-label="View"
+              class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -237,7 +262,7 @@
 
           <li class="project reveal" data-tint="#3f5566">
             <a
-              class="project__link" data-tilt data-cursor-label="View"
+              class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
@@ -259,6 +284,18 @@
           </li>
         </ol>
       </section>
+
+      <!-- ───────────────────────── kinetic marquee ───────────────────────── -->
+      <div class="bigmarq" aria-hidden="true" data-marquee="0.9">
+        <div class="bigmarq__track marquee__track">
+          <span>Software Engineer</span><span class="bigmarq__star">✳</span>
+          <span>Scalable Systems</span><span class="bigmarq__star">✳</span>
+          <span>Agentic AI</span><span class="bigmarq__star">✳</span>
+          <span>Software Engineer</span><span class="bigmarq__star">✳</span>
+          <span>Scalable Systems</span><span class="bigmarq__star">✳</span>
+          <span>Agentic AI</span><span class="bigmarq__star">✳</span>
+        </div>
+      </div>
 
       <!-- ───────────────────────── about ───────────────────────── -->
       <section id="about" class="section">
@@ -283,7 +320,7 @@
             </p>
             <p>
               Outside of shipping, I've spent a lot of hours on competitive
-              programming — 600+ problems, and a Codeforces Master's camp where I
+              programming. 600+ problems, and a Codeforces Master's camp where I
               landed in the Hall of Fame for matrix exponentiation and sqrt
               decomposition solutions. That instinct for complexity shows up in
               everything I write.
@@ -317,10 +354,42 @@
         </div>
       </section>
 
+      <!-- ───────────────────────── open source ───────────────────────── -->
+      <section id="github" class="section gh">
+        <div class="section__head reveal">
+          <span class="section__idx">03</span>
+          <h2 class="section__title">Open Source</h2>
+          <a
+            class="section__aside"
+            href="https://github.com/gurleenkaur164"
+            target="_blank"
+            rel="noreferrer noopener"
+            data-cursor-label="Open"
+          >
+            live from github ↗
+          </a>
+        </div>
+
+        <div class="gh__grid">
+          <div class="gh__stats" data-gh-stats>
+            <div class="gh__stat gh__skeleton"></div>
+            <div class="gh__stat gh__skeleton"></div>
+            <div class="gh__stat gh__skeleton"></div>
+          </div>
+
+          <div class="gh__panel reveal">
+            <h4 class="gh__panel-title">Most-used languages</h4>
+            <div class="gh__langs" data-gh-langs></div>
+          </div>
+        </div>
+
+        <div class="gh__repos reveal" data-gh-repos></div>
+      </section>
+
       <!-- ───────────────────────── recognition ───────────────────────── -->
       <section class="section">
         <div class="section__head reveal">
-          <span class="section__idx">03</span>
+          <span class="section__idx">04</span>
           <h2 class="section__title">Recognition</h2>
         </div>
 
@@ -358,10 +427,39 @@
         </ul>
       </section>
 
+      <!-- ───────────────────────── terminal ───────────────────────── -->
+      <section class="section">
+        <div class="section__head reveal">
+          <span class="section__idx">05</span>
+          <h2 class="section__title">Or just ask</h2>
+          <span class="section__aside dim">an interactive shell</span>
+        </div>
+
+        <div id="terminal" class="term reveal" role="group" aria-label="Interactive terminal">
+          <div class="term__bar">
+            <span class="term__dot"></span>
+            <span class="term__dot"></span>
+            <span class="term__dot"></span>
+            <span class="term__title">gurleen · zsh</span>
+          </div>
+          <div class="term__output" aria-live="polite" data-lenis-prevent></div>
+          <form class="term__form" autocomplete="off">
+            <span class="term__prompt">gurleen@portfolio:~$</span>
+            <input
+              class="term__input"
+              type="text"
+              spellcheck="false"
+              autocapitalize="off"
+              aria-label="Type a command"
+            />
+          </form>
+        </div>
+      </section>
+
       <!-- ───────────────────────── contact ───────────────────────── -->
       <section id="contact" class="section contact">
         <div class="section__head reveal">
-          <span class="section__idx">04</span>
+          <span class="section__idx">06</span>
           <h2 class="section__title">Contact</h2>
         </div>
 
@@ -404,7 +502,7 @@
 
     <footer class="foot">
       <span>© 2026 Gurleen Kaur</span>
-      <span class="foot__made">Built by hand · Three.js</span>
+      <span class="foot__made">Built by hand · Three.js · 3D</span>
     </footer>
 
     <script type="module" src="/src/main.js"></script>

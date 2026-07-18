@@ -1,11 +1,34 @@
-import { createPortrait } from "./portrait.js";
+import { createOffice } from "./office3d.js";
 import { createCursor, createMagnetic } from "./cursor.js";
 import { createPalette } from "./palette.js";
+import { createTheme } from "./theme.js";
+import { createTerminal } from "./terminal.js";
+import { createGithub } from "./github.js";
+import { createMotion } from "./motion.js";
+import { createLoader } from "./loader.js";
+import { createPreview } from "./preview.js";
 
-createPortrait(document.getElementById("portrait"), "/gurleen-cut.png");
+// the 3D office diorama hero — loads the caricature cutout, placeholder until it exists
+createOffice(document.getElementById("avatar"), "/caricature-cut.png");
+
 createCursor();
 createMagnetic();
 createPalette();
+createMotion();
+createPreview();
+createTheme();
+
+createTerminal(document.getElementById("terminal"));
+createGithub(document.getElementById("github"));
+
+// the hero waits for the loader curtain to lift, then animates in
+function revealHero() {
+  document.querySelectorAll(".hero .reveal").forEach((el, i) => {
+    el.style.transitionDelay = `${i * 90}ms`;
+    el.classList.add("is-in");
+  });
+}
+createLoader(revealHero);
 
 /* ── reveal on scroll ─────────────────────────────────────────────────── */
 const io = new IntersectionObserver(
@@ -25,13 +48,6 @@ document.querySelectorAll(".reveal").forEach((el, i) => {
   io.observe(el);
 });
 
-// the hero can't wait for a scroll — it's already in view
-requestAnimationFrame(() => {
-  document.querySelectorAll(".hero .reveal").forEach((el, i) => {
-    el.style.transitionDelay = `${i * 90}ms`;
-    el.classList.add("is-in");
-  });
-});
 
 /* ── per-project hover tint ───────────────────────────────────────────── */
 document.querySelectorAll(".project[data-tint]").forEach((el) => {
@@ -82,28 +98,7 @@ if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   document.querySelectorAll("[data-count]").forEach((el) => statIO.observe(el));
 }
 
-/* ── scroll progress bar ──────────────────────────────────────────────── */
-const progressBar = document.querySelector(".progress__bar");
-if (progressBar) {
-  let ticking = false;
-  const updateProgress = () => {
-    const doc = document.documentElement;
-    const max = doc.scrollHeight - doc.clientHeight;
-    const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
-    progressBar.style.width = `${pct}%`;
-    ticking = false;
-  };
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(updateProgress);
-    },
-    { passive: true }
-  );
-  updateProgress();
-}
+/* scroll progress bar is driven by motion.js from Lenis */
 
 /* ── scrollspy: highlight the nav link for whatever section is in view ── */
 const navLinks = [...document.querySelectorAll(".nav__links a[href^='#']")];

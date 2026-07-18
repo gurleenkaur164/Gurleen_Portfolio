@@ -3,6 +3,8 @@
  * scoring — the command list is ~10 items, ranking sophistication buys
  * nothing here), full keyboard control, focus restored on close.
  */
+import { scrollTo } from "./motion.js";
+
 const COMMANDS = [
   { label: "Go to top", hint: "section", action: () => scrollToId("top") },
   { label: "Go to Work", hint: "section", action: () => scrollToId("work") },
@@ -31,7 +33,8 @@ const COMMANDS = [
 ];
 
 function scrollToId(id) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  // route through Lenis so palette jumps glide like every other scroll
+  if (document.getElementById(id)) scrollTo(`#${id}`);
 }
 
 function copyText(text) {
