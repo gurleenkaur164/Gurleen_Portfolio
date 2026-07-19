@@ -877,7 +877,39 @@ a.section__aside:hover {
   letter-spacing: -0.02em;
 }
 
-/* ── projects ─────────────────────────────────────────────────────────── */
+/* ── 3D project carousel ─────────────────────────────────────────────── */
+.carousel-wrap {
+  position: relative;
+  width: 100%;
+  height: clamp(550px, 70vh, 850px);
+  margin-bottom: 3rem;
+}
+
+.carousel-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.carousel-hint {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  pointer-events: none;
+}
+
+/* hide the flat list when the 3D carousel is active */
+.has-3d-carousel .projects {
+  display: none;
+}
+
+/* ── projects (flat fallback) ────────────────────────────────────────── */
 .projects {
   list-style: none;
 }
@@ -1479,6 +1511,14 @@ a.section__aside:hover {
 
   .about {
     grid-template-columns: 1fr;
+  }
+
+  .carousel-wrap {
+    display: none;
+  }
+
+  .has-3d-carousel .projects {
+    display: block;
   }
 
   .project__link {

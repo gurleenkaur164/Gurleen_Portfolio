@@ -7,6 +7,7 @@ import { createGithub } from "./github.js";
 import { createMotion } from "./motion.js";
 import { createLoader } from "./loader.js";
 import { createPreview } from "./preview.js";
+import { createProjectCarousel } from "./projectCarousel3d.js";
 
 // the 3D office diorama hero — loads the caricature cutout, placeholder until it exists
 createOffice(document.getElementById("avatar"), "/caricature-cut.png");
@@ -14,9 +15,20 @@ createOffice(document.getElementById("avatar"), "/caricature-cut.png");
 createCursor();
 createMagnetic();
 createPalette();
-createMotion();
+const { lenis } = createMotion();
 createPreview();
 createTheme();
+
+// 3D project carousel — scroll velocity drives rotation
+try {
+  const carouselCanvas = document.getElementById("project-carousel");
+  if (carouselCanvas) {
+    const carousel = createProjectCarousel(carouselCanvas, () => lenis?.velocity ?? 0);
+    if (carousel) document.getElementById("work").classList.add("has-3d-carousel");
+  }
+} catch (e) {
+  console.warn("Project carousel failed to init:", e);
+}
 
 createTerminal(document.getElementById("terminal"));
 createGithub(document.getElementById("github"));
