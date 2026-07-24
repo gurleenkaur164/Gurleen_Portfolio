@@ -28,6 +28,7 @@
       <div class="loader__curtain"></div>
     </div>
 
+
     <div class="vignette" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 
@@ -38,6 +39,7 @@
       <nav class="nav__links">
         <a href="#work" data-magnetic>Work</a>
         <a href="#about" data-magnetic>About</a>
+        <a href="#opportunities" data-magnetic>Hire</a>
         <a href="#contact" data-magnetic>Contact</a>
         <button
           type="button"
@@ -92,53 +94,99 @@
 
     <main id="top">
       <!-- ───────────────────────── hero ───────────────────────── -->
+      <!-- Exactly one viewport tall, and nothing else is allowed to peek in.
+           Name left, role right, caricature centred between them, arrow out. -->
       <section class="hero">
-        <canvas id="avatar"></canvas>
-        <span class="hero__portrait-cap" data-avatar-hint>loading…</span>
+        <div class="hero__left">
+          <p class="hero__hello reveal">Hello! I'm</p>
+          <h1 class="hero__title reveal">
+            <span class="line"><span>Gurleen</span></span>
+            <span class="line"><span>Kaur</span></span>
+          </h1>
+        </div>
 
-        <div class="hero__content">
-          <div class="hero__copy">
-            <p class="eyebrow reveal">Patiala, India · b. 2004</p>
+        <!-- The <img> is the real content and the fallback; the 3D canvas
+             replaces it only once WebGL is up and the maps are built, by
+             adding .is-3d to the figure. No WebGL, no JS, slow decode — the
+             flat caricature is still there. -->
+        <div class="hero__figure">
+          <img
+            class="hero__char"
+            src="/caricature-cut.png"
+            alt="3D caricature of Gurleen Kaur"
+            width="847"
+            height="891"
+            fetchpriority="high"
+          />
+          <canvas class="hero__canvas" id="hero-char" aria-hidden="true"></canvas>
+        </div>
 
-            <h1 class="hero__title reveal">
-              <span class="line"><span>Gurleen</span></span>
-              <span class="line"><span>Kaur</span></span>
-            </h1>
-
-            <p class="hero__role reveal">
-              Software &amp; Scalable&nbsp;Systems Engineer<br />
-              <span class="dim">building agentic AI that does real work</span>
-            </p>
+        <div class="hero__right">
+          <p class="hero__lead reveal">A Full&nbsp;Stack</p>
+          <!-- the trailing word rolls on a loop; the track repeats its first
+               item at the end so the wrap has no visible seam -->
+          <div class="hero__roles reveal">
+            <!-- Keep these short. The roller is sized for its longest word,
+                 so one long entry shrinks all of them. -->
+            <span class="roller" aria-label="Developer, AI Engineer, Engineer">
+              <span class="roller__track" aria-hidden="true">
+                <span>Developer</span>
+                <span>AI Engineer</span>
+                <span>Engineer</span>
+                <span>Developer</span>
+              </span>
+            </span>
           </div>
         </div>
 
-        <div class="hero__foot">
-          <p class="hero__blurb reveal">
-            Final-year Electronics &amp; Computer Engineering at Thapar
-            Institute. I build systems that hold up under load, multi-agent
-            pipelines, retrieval stacks, and the full-stack surfaces around
-            them.
-          </p>
-          <div class="hero__scroll reveal" data-magnetic>
-            <span class="hero__scroll-line"></span>
-            <span>Scroll</span>
-          </div>
-        </div>
+        <!-- no data-magnetic here: createMagnetic writes style.transform, which
+             would clobber the translateX(-50%) that centres this -->
+        <a class="hero__arrow" href="#intro" aria-label="Scroll to content">
+          <span class="hero__arrow-label">Scroll</span>
+          <svg viewBox="0 0 24 30" width="18" height="22" aria-hidden="true">
+            <path
+              d="M12 1v26M4 20l8 8 8-8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
       </section>
 
       <!-- ───────────────────────── marquee ───────────────────────── -->
       <div class="ticker" aria-hidden="true" data-marquee="0.5">
         <div class="ticker__track marquee__track">
+          <!-- duplicated verbatim: setupMarquee wraps at half the track's
+               scrollWidth, so the two halves must be identical -->
+          <span>React</span><span>·</span><span>Next.js</span><span>·</span>
+          <span>TypeScript</span><span>·</span><span>Node.js</span><span>·</span>
+          <span>FastAPI</span><span>·</span><span>PostgreSQL</span><span>·</span>
+          <span>System Design</span><span>·</span><span>REST APIs</span><span>·</span>
           <span>Agentic AI</span><span>·</span><span>LangChain</span><span>·</span>
-          <span>FastAPI</span><span>·</span><span>Next.js</span><span>·</span>
-          <span>RAG</span><span>·</span><span>MCP</span><span>·</span>
-          <span>Distributed Systems</span><span>·</span><span>Computer Vision</span><span>·</span>
+          <span>RAG</span><span>·</span><span>Docker</span><span>·</span>
+          <span>AWS</span><span>·</span><span>Distributed Systems</span><span>·</span>
+          <span>React</span><span>·</span><span>Next.js</span><span>·</span>
+          <span>TypeScript</span><span>·</span><span>Node.js</span><span>·</span>
+          <span>FastAPI</span><span>·</span><span>PostgreSQL</span><span>·</span>
+          <span>System Design</span><span>·</span><span>REST APIs</span><span>·</span>
           <span>Agentic AI</span><span>·</span><span>LangChain</span><span>·</span>
-          <span>FastAPI</span><span>·</span><span>Next.js</span><span>·</span>
-          <span>RAG</span><span>·</span><span>MCP</span><span>·</span>
-          <span>Distributed Systems</span><span>·</span><span>Computer Vision</span><span>·</span>
+          <span>RAG</span><span>·</span><span>Docker</span><span>·</span>
+          <span>AWS</span><span>·</span><span>Distributed Systems</span><span>·</span>
         </div>
       </div>
+
+      <!-- ───────────────────────── intro ───────────────────────── -->
+      <!-- where the hero's scroll arrow lands -->
+      <section id="intro" class="intro">
+        <p class="intro__blurb reveal">
+          Final-year Electronics &amp; Computer Engineering at Thapar Institute.
+          I build systems that hold up under load, multi-agent pipelines,
+          retrieval stacks, and the full-stack surfaces around them.
+        </p>
+      </section>
 
       <!-- ───────────────────────── stats ───────────────────────── -->
       <section class="stats">
@@ -167,20 +215,19 @@
           <h2 class="section__title">Selected Work</h2>
         </div>
 
-        <div class="carousel-wrap reveal">
-          <canvas id="project-carousel"></canvas>
-          <p class="carousel-hint">drag to spin · click a card to open</p>
-        </div>
-
         <ol class="projects">
-          <li class="project reveal" data-tint="#8c4a32">
+          <li class="project reveal">
             <a
               class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <span class="project__no">01</span>
+              <span class="project__glare" aria-hidden="true"></span>
+              <div class="project__top">
+                <span class="project__no">01</span>
+                <span class="project__arrow" aria-hidden="true">↗</span>
+              </div>
               <div class="project__body">
                 <h3 class="project__name">Adhikar.AI</h3>
                 <p class="project__desc">
@@ -193,18 +240,21 @@
                   <li>Llama 3</li><li>FastAPI</li><li>Next.js</li><li>PostgreSQL</li>
                 </ul>
               </div>
-              <span class="project__arrow" aria-hidden="true">↗</span>
             </a>
           </li>
 
-          <li class="project reveal" data-tint="#3f5a4a">
+          <li class="project reveal">
             <a
               class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <span class="project__no">02</span>
+              <span class="project__glare" aria-hidden="true"></span>
+              <div class="project__top">
+                <span class="project__no">02</span>
+                <span class="project__arrow" aria-hidden="true">↗</span>
+              </div>
               <div class="project__body">
                 <h3 class="project__name">CampusBazaar</h3>
                 <p class="project__desc">
@@ -216,18 +266,21 @@
                   <li>Next.js</li><li>TypeScript</li><li>Gemini API</li><li>Resend</li>
                 </ul>
               </div>
-              <span class="project__arrow" aria-hidden="true">↗</span>
             </a>
           </li>
 
-          <li class="project reveal" data-tint="#6b4a63">
+          <li class="project reveal">
             <a
               class="project__link" data-tilt
               href="https://github.com/gurleenkaur164/CareerPathRecommendor"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <span class="project__no">03</span>
+              <span class="project__glare" aria-hidden="true"></span>
+              <div class="project__top">
+                <span class="project__no">03</span>
+                <span class="project__arrow" aria-hidden="true">↗</span>
+              </div>
               <div class="project__body">
                 <h3 class="project__name">Career Path Recommender</h3>
                 <p class="project__desc">
@@ -238,18 +291,21 @@
                   <li>FastAPI</li><li>Streamlit</li><li>NLP</li>
                 </ul>
               </div>
-              <span class="project__arrow" aria-hidden="true">↗</span>
             </a>
           </li>
 
-          <li class="project reveal" data-tint="#7a5233">
+          <li class="project reveal">
             <a
               class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <span class="project__no">04</span>
+              <span class="project__glare" aria-hidden="true"></span>
+              <div class="project__top">
+                <span class="project__no">04</span>
+                <span class="project__arrow" aria-hidden="true">↗</span>
+              </div>
               <div class="project__body">
                 <h3 class="project__name">Resume Job Analyser</h3>
                 <p class="project__desc">
@@ -261,18 +317,21 @@
                   <li>RAG</li><li>LLM Pipelines</li><li>Vector DB</li>
                 </ul>
               </div>
-              <span class="project__arrow" aria-hidden="true">↗</span>
             </a>
           </li>
 
-          <li class="project reveal" data-tint="#3f5566">
+          <li class="project reveal">
             <a
               class="project__link" data-tilt
               href="https://github.com/gurleenkaur164"
               target="_blank"
               rel="noreferrer noopener"
             >
-              <span class="project__no">05</span>
+              <span class="project__glare" aria-hidden="true"></span>
+              <div class="project__top">
+                <span class="project__no">05</span>
+                <span class="project__arrow" aria-hidden="true">↗</span>
+              </div>
               <div class="project__body">
                 <h3 class="project__name">AI Website Guardian</h3>
                 <p class="project__desc">
@@ -284,7 +343,6 @@
                   <li>Ollama</li><li>Multi-Agent</li><li>Real-time</li>
                 </ul>
               </div>
-              <span class="project__arrow" aria-hidden="true">↗</span>
             </a>
           </li>
         </ol>
@@ -333,66 +391,105 @@
           </div>
 
           <div class="about__side">
+            <!-- the full stack list lives in its own section now; this is
+                 just the at-a-glance panel -->
             <div class="skillset reveal">
-              <h4>Languages</h4>
-              <p>Python · C++ · C · JavaScript · TypeScript</p>
-            </div>
-            <div class="skillset reveal">
-              <h4>AI / ML</h4>
+              <h4>Education</h4>
               <p>
-                Agentic AI · LangChain · MCP · Ollama · HuggingFace · RAG · NLP ·
-                Deep Learning · Computer Vision · scikit-learn
+                B.E. Electronics &amp; Computer Engineering<br />
+                Thapar Institute, Patiala · CGPA 8.74
               </p>
             </div>
             <div class="skillset reveal">
-              <h4>Systems</h4>
-              <p>
-                FastAPI · Node.js · REST · Pydantic · PostgreSQL · MongoDB ·
-                Supabase · Vector DBs · AWS (S3, IAM)
-              </p>
+              <h4>Focus</h4>
+              <p>Full-stack web · agentic AI · scalable backends</p>
             </div>
             <div class="skillset reveal">
-              <h4>Frontend</h4>
-              <p>React.js · Next.js · Streamlit · Gradio</p>
+              <h4>Based in</h4>
+              <p>Patiala, India · open to remote worldwide</p>
+            </div>
+            <div class="skillset reveal">
+              <h4>Availability</h4>
+              <p>Freelance now · full-time from July 2026</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ───────────────────────── open source ───────────────────────── -->
-      <section id="github" class="section gh">
+      <!-- ───────────────────────── tech stack ───────────────────────── -->
+      <section id="stack" class="section stack">
         <div class="section__head reveal">
           <span class="section__idx">03</span>
-          <h2 class="section__title">Open Source</h2>
-          <a
-            class="section__aside"
-            href="https://github.com/gurleenkaur164"
-            target="_blank"
-            rel="noreferrer noopener"
-            data-cursor-label="Open"
-          >
-            live from github ↗
-          </a>
+          <h2 class="section__title">Tech Stack</h2>
+          <span class="section__aside dim">what I build with</span>
         </div>
 
-        <div class="gh__grid">
-          <div class="gh__stats" data-gh-stats>
-            <div class="gh__stat gh__skeleton"></div>
-            <div class="gh__stat gh__skeleton"></div>
-            <div class="gh__stat gh__skeleton"></div>
-          </div>
+        <ul class="stack__grid">
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">Languages</h3>
+            <ul class="stackset__list">
+              <li>TypeScript</li><li>JavaScript</li><li>Python</li>
+              <li>C++</li><li>C</li><li>SQL</li>
+            </ul>
+          </li>
 
-          <div class="gh__panel reveal">
-            <h4 class="gh__panel-title">Most-used languages</h4>
-            <div class="gh__langs" data-gh-langs></div>
-          </div>
-        </div>
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">Frontend</h3>
+            <ul class="stackset__list">
+              <li>React</li><li>Next.js</li><li>App Router</li>
+              <li>Tailwind CSS</li><li>Zustand</li><li>HTML5 / CSS3</li>
+              <li>Responsive UI</li><li>Three.js</li><li>Streamlit</li><li>Gradio</li>
+            </ul>
+          </li>
 
-        <div class="gh__repos reveal" data-gh-repos></div>
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">Backend</h3>
+            <ul class="stackset__list">
+              <li>Node.js</li><li>Express</li><li>FastAPI</li>
+              <li>REST APIs</li><li>Server Actions</li><li>WebSockets</li>
+              <li>Pydantic</li><li>JWT &amp; OAuth</li><li>Magic-link auth</li>
+            </ul>
+          </li>
+
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">Databases</h3>
+            <ul class="stackset__list">
+              <li>PostgreSQL</li><li>MongoDB</li><li>Supabase</li>
+              <li>Redis</li><li>Prisma</li><li>Schema design</li>
+              <li>Indexing</li><li>pgvector</li><li>FAISS</li>
+            </ul>
+          </li>
+
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">System Design</h3>
+            <ul class="stackset__list">
+              <li>Scalability</li><li>Caching strategies</li><li>Load balancing</li>
+              <li>Message queues</li><li>Microservices</li><li>Event-driven</li>
+              <li>Rate limiting</li><li>Query optimisation</li><li>Fault tolerance</li>
+            </ul>
+          </li>
+
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">AI / ML</h3>
+            <ul class="stackset__list">
+              <li>Agentic AI</li><li>LangChain</li><li>MCP</li><li>RAG</li>
+              <li>Ollama</li><li>HuggingFace</li><li>NLP</li>
+              <li>Deep Learning</li><li>Computer Vision</li><li>scikit-learn</li>
+            </ul>
+          </li>
+
+          <li class="stackset reveal" data-spotlight>
+            <h3 class="stackset__name">Cloud &amp; Tooling</h3>
+            <ul class="stackset__list">
+              <li>AWS (S3, EC2, IAM)</li><li>Docker</li><li>Vercel</li>
+              <li>GitHub Actions</li><li>Git</li><li>Vite</li><li>Postman</li>
+            </ul>
+          </li>
+        </ul>
       </section>
 
       <!-- ───────────────────────── recognition ───────────────────────── -->
-      <section class="section">
+      <section id="recognition" class="section">
         <div class="section__head reveal">
           <span class="section__idx">04</span>
           <h2 class="section__title">Recognition</h2>
@@ -433,7 +530,7 @@
       </section>
 
       <!-- ───────────────────────── terminal ───────────────────────── -->
-      <section class="section">
+      <section id="ask" class="section">
         <div class="section__head reveal">
           <span class="section__idx">05</span>
           <h2 class="section__title">Or just ask</h2>
@@ -461,10 +558,82 @@
         </div>
       </section>
 
+      <!-- ───────────────────────── open for opportunities ───────────────────────── -->
+      <section id="opportunities" class="section opps">
+        <div class="section__head reveal">
+          <span class="section__idx">06</span>
+          <h2 class="section__title">Open for Opportunities</h2>
+          <span class="section__aside opps__status">
+            <span class="opps__pulse" aria-hidden="true"></span>
+            Available now
+          </span>
+        </div>
+
+        <p class="opps__lede reveal">
+          I'm taking on <strong>full-stack freelance projects</strong> and
+          looking for <strong>internships</strong> and
+          <strong>new-grad engineering roles</strong> starting mid-2026. Remote
+          worldwide, or on-site across India.
+        </p>
+
+        <ul class="opps__grid">
+          <li class="opp reveal" data-spotlight>
+            <span class="opp__no">01</span>
+            <h3 class="opp__name">Freelance &amp; Contract</h3>
+            <p class="opp__desc">
+              End-to-end product builds — Next.js front ends on FastAPI or
+              Node services, Postgres schema design, auth, and the AI layer on
+              top. I ship the whole surface, not just the demo path.
+            </p>
+            <ul class="opp__tags">
+              <li>Full-stack apps</li><li>RAG &amp; agent pipelines</li>
+              <li>API design</li><li>Rescue / refactor</li>
+            </ul>
+            <span class="opp__meta">Project or hourly · remote</span>
+          </li>
+
+          <li class="opp reveal" data-spotlight>
+            <span class="opp__no">02</span>
+            <h3 class="opp__name">Internships</h3>
+            <p class="opp__desc">
+              SWE, AI/ML, or platform internships where the work is real and
+              the code ships. Final-year student, so I'm free for summer and
+              full-time-convertible terms.
+            </p>
+            <ul class="opp__tags">
+              <li>Backend</li><li>AI / ML</li><li>Infrastructure</li><li>Full-stack</li>
+            </ul>
+            <span class="opp__meta">Summer 2026 · remote or on-site</span>
+          </li>
+
+          <li class="opp reveal" data-spotlight>
+            <span class="opp__no">03</span>
+            <h3 class="opp__name">New-grad Roles</h3>
+            <p class="opp__desc">
+              Graduating 2026 and open to full-time software and AI engineering
+              roles. Strongest where systems thinking matters — distributed
+              services, data pipelines, and agentic infrastructure.
+            </p>
+            <ul class="opp__tags">
+              <li>Software Engineer</li><li>AI Engineer</li><li>Backend / Platform</li>
+            </ul>
+            <span class="opp__meta">From July 2026</span>
+          </li>
+        </ul>
+
+        <div class="opps__cta reveal">
+          <a class="btn btn--solid" href="mailto:gk0370435@gmail.com?subject=Project%20enquiry" data-magnetic>
+            <span class="btn__dot" aria-hidden="true"></span>
+            Start a conversation
+          </a>
+          <span class="opps__note">Usually replies within a day</span>
+        </div>
+      </section>
+
       <!-- ───────────────────────── contact ───────────────────────── -->
       <section id="contact" class="section contact">
         <div class="section__head reveal">
-          <span class="section__idx">06</span>
+          <span class="section__idx">07</span>
           <h2 class="section__title">Contact</h2>
         </div>
 

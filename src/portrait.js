@@ -43,8 +43,12 @@ export function createPortrait(canvas, src) {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const scene = new Scene();
-  const camera = new PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 0, 9.2);
+  const camera = new PerspectiveCamera(FOV, 1, 0.1, 100);
+  // The resting distance. The intro dolly pushes the camera back off this and
+  // eases in to it, so anything that has to be framing-accurate (point sizing)
+  // must measure against CAM_Z, not the live camera.
+  const CAM_Z = 9.2;
+  camera.position.set(0, 0, CAM_Z);
 
   const renderer = new WebGLRenderer({
     canvas,
@@ -88,9 +92,20 @@ export function createPortrait(canvas, src) {
   geo.setAttribute("aUv", new BufferAttribute(uv, 2));
   geo.setAttribute("aSeed", new BufferAttribute(seed, 1));
 
-  const tex = new TextureLoader().load(src, () => {
-    mat.uniforms.uReady.value = 1;
-  });
+  const hint = document.querySelector("[data-avatar-hint]");
+
+  const tex = new TextureLoader().load(
+    src,
+    () => {
+      mat.uniforms.uReady.value = 1;
+      // wait for the assemble to finish before inviting anyone to poke it
+      if (hint) setTimeout(() => (hint.textContent = "drag to scatter"), 2600);
+    },
+    undefined,
+    () => {
+      if (hint) hint.textContent = "portrait unavailable";
+    }
+  );
   tex.colorSpace = SRGBColorSpace;
 
   const mat = new ShaderMaterial({
@@ -129,6 +144,7 @@ export function createPortrait(canvas, src) {
       varying float vLum;
       varying float vMask;
       varying float vSeed;
+      varying float vIn;
 
       // cheap hash -> the scattered start position for the assemble intro
       vec3 hash3(float n) {
@@ -166,9 +182,19 @@ export function createPortrait(canvas, src) {
         pos.xy += dir * push * 0.5;
         pos.z += push * 0.85;
 
-        // intro: fly in from scatter
+        // ── intro: points fly in from scatter as a sweeping wave ─────────
+        // A single global lerp made 160k points land at once, which reads as
+        // a cross-fade rather than an assembly. Giving each point its own
+        // arrival time — mostly a left-to-right sweep, plus a per-point
+        // jitter so the leading edge is ragged instead of a hard wipe — is
+        // what makes it look like the portrait is being *drawn*.
+        float delay = aUv.x * 0.45 + (1.0 - aUv.y) * 0.20 + aSeed * 0.18;
+        float t = clamp((uIntro * 1.83 - delay) / 0.55, 0.0, 1.0);
+        float e = 1.0 - pow(1.0 - t, 3.0); // ease-out cubic
+        vIn = e;
+
         vec3 scatter = hash3(aSeed * 100.0) * vec3(7.0, 7.0, 5.0);
-        pos = mix(scatter, pos, uIntro);
+        pos = mix(scatter, pos, e);
 
         vec4 mv = modelViewMatrix * vec4(pos, 1.0);
         gl_Position = projectionMatrix * mv;
@@ -179,7 +205,7 @@ export function createPortrait(canvas, src) {
         // its neighbours and her face washed out.
         float size = uCellPx * mix(1.3, 1.55, lum);
         size += push * 2.0 * uDpr;
-        gl_PointSize = size * (9.0 / -mv.z) * uIntro;
+        gl_PointSize = size * (9.0 / -mv.z) * e;
       }
     `,
     fragmentShader: /* glsl */ `
@@ -187,11 +213,11 @@ export function createPortrait(canvas, src) {
       uniform vec3  uEmber;
       uniform vec3  uBone;
       uniform float uReady;
-      uniform float uIntro;
 
       varying float vLum;
       varying float vMask;
       varying float vSeed;
+      varying float vIn;
 
       void main() {
         // Round dots, near-solid at the centre. This matters more than it
@@ -213,7 +239,7 @@ export function createPortrait(canvas, src) {
         vec3 col = mix(uDark, uEmber, smoothstep(0.0, 0.55, l));
         col = mix(col, uBone, smoothstep(0.55, 0.95, l));
 
-        float a = vMask * soft * uReady * uIntro;
+        float a = vMask * soft * uReady * vIn;
         a *= 0.92 + vSeed * 0.08; // a touch of grain; more than this veils her
 
         if (a < 0.01) discard;
@@ -237,7 +263,7 @@ export function createPortrait(canvas, src) {
     mat.uniforms.uDpr.value = dpr;
 
     // world units visible at the z=0 plane the points sit on
-    const visH = 2 * camera.position.z * Math.tan((FOV * Math.PI) / 360);
+    const visH = 2 * CAM_Z * Math.tan((FOV * Math.PI) / 360);
     mat.uniforms.uCellPx.value = ((r.height * dpr) / visH) * CELL;
   };
 
@@ -247,10 +273,23 @@ export function createPortrait(canvas, src) {
   resize();
 
   // ── pointer ──────────────────────────────────────────────────────────
+  // Two separate things read the cursor, and they want different spaces:
+  //   ptr  — the scatter shove, in the portrait's own world plane, so it only
+  //          bites when the cursor is actually over her.
+  //   head — the yaw/pitch tilt, normalised over the whole viewport, so she
+  //          keeps turning to follow you even while you're reading the name
+  //          on the other side of the hero.
   const ptr = new Vector2(-999, -999);
   const tgt = new Vector2(-999, -999);
+  const head = new Vector2(0, 0);
+  const headTgt = new Vector2(0, 0);
 
   const onMove = (e) => {
+    headTgt.set(
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -((e.clientY / window.innerHeight) * 2 - 1)
+    );
+
     const r = canvas.getBoundingClientRect();
     if (!r.width) return;
     const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
@@ -263,14 +302,20 @@ export function createPortrait(canvas, src) {
     tgt.set(p.x, p.y);
   };
 
-  const onLeave = () => tgt.set(-999, -999);
+  const onLeave = () => {
+    tgt.set(-999, -999);
+    headTgt.set(0, 0); // drift back to facing forward
+  };
 
   window.addEventListener("pointermove", onMove, { passive: true });
   document.addEventListener("pointerleave", onLeave);
 
   // ── loop ─────────────────────────────────────────────────────────────
+  const INTRO_DUR = 2.4; // seconds for the wave to cross the whole portrait
+
   let raf = 0;
   let t0 = performance.now();
+  let introStart = -1; // set the frame the texture decodes
   let visible = true;
 
   const tick = (now) => {
@@ -280,19 +325,32 @@ export function createPortrait(canvas, src) {
     const t = (now - t0) / 1000;
     mat.uniforms.uTime.value = t;
 
-    // assemble once the texture has decoded
+    // Assemble once the texture has decoded. Driven off wall time rather
+    // than an asymptotic lerp: the shader's per-point delays need uIntro to
+    // actually *reach* 1, and a lerp only ever approaches it — the last few
+    // percent of the sweep would never finish.
     if (mat.uniforms.uReady.value === 1) {
-      const target = 1;
-      const k = reduced ? 1 : 0.02;
-      mat.uniforms.uIntro.value += (target - mat.uniforms.uIntro.value) * k;
+      if (introStart < 0) introStart = t;
+      const p = reduced ? 1 : Math.min((t - introStart) / INTRO_DUR, 1);
+      mat.uniforms.uIntro.value = p;
+
+      // a slow dolly in behind the assemble — the scene settles toward the
+      // camera as the points land, so the intro has depth as well as spread
+      camera.position.z = CAM_Z + (1 - p) * (reduced ? 0 : 1.6);
     }
 
     ptr.lerp(tgt, 0.12);
     mat.uniforms.uPointer.value.copy(ptr);
 
     if (!reduced) {
-      pts.rotation.y = Math.sin(t * 0.25) * 0.08;
-      pts.rotation.x = Math.cos(t * 0.2) * 0.04;
+      // Head tracking. The cursor sets a yaw/pitch target and the cloud
+      // eases toward it; a slow idle sine rides on top so she is never
+      // perfectly still even when the pointer is parked. Damping is low
+      // (0.05) on purpose — a fast follow reads as a jittery canvas, a slow
+      // one reads as someone turning to look at you.
+      head.lerp(headTgt, 0.05);
+      pts.rotation.y = head.x * 0.34 + Math.sin(t * 0.25) * 0.05;
+      pts.rotation.x = -head.y * 0.2 + Math.cos(t * 0.2) * 0.03;
     }
 
     renderer.render(scene, camera);

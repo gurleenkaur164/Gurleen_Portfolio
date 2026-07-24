@@ -1,16 +1,26 @@
-import { createOffice } from "./office3d.js";
+import { createHeroFigure } from "./heroFigure.js";
+import { createHeroChar3d } from "./heroChar3d.js";
 import { createCursor, createMagnetic } from "./cursor.js";
 import { createPalette } from "./palette.js";
 import { createTheme } from "./theme.js";
 import { createTerminal } from "./terminal.js";
-import { createGithub } from "./github.js";
 import { createMotion } from "./motion.js";
 import { createLoader } from "./loader.js";
 import { createPreview } from "./preview.js";
-import { createProjectCarousel } from "./projectCarousel3d.js";
 
-// the 3D office diorama hero — loads the caricature cutout, placeholder until it exists
-createOffice(document.getElementById("avatar"), "/caricature-cut.png");
+// The hero is the caricature, flanked by type. It renders as real geometry in
+// three.js — a dome derived from the alpha matte, displaced and normal-mapped
+// so lighting responds to it — with the flat <img> as the fallback.
+// portrait.js (point cloud) and office3d.js (desk diorama) are the two earlier
+// heroes, still in the repo but unwired; see the README.
+const heroFigure = document.querySelector(".hero__figure");
+createHeroChar3d(document.getElementById("hero-char"), "/caricature-cut.png", {
+  onReady: () => heroFigure?.classList.add("is-3d"),
+});
+
+// the cursor parallax still drives the wrapper, so it applies to whichever of
+// the two (canvas or img) is currently visible
+createHeroFigure(document.querySelector(".hero"));
 
 createCursor();
 createMagnetic();
@@ -19,19 +29,12 @@ const { lenis } = createMotion();
 createPreview();
 createTheme();
 
-// 3D project carousel — scroll velocity drives rotation
-try {
-  const carouselCanvas = document.getElementById("project-carousel");
-  if (carouselCanvas) {
-    const carousel = createProjectCarousel(carouselCanvas, () => lenis?.velocity ?? 0);
-    if (carousel) document.getElementById("work").classList.add("has-3d-carousel");
-  }
-} catch (e) {
-  console.warn("Project carousel failed to init:", e);
-}
+// Selected Work is the tilting card grid now. projectCarousel3d.js is the
+// previous presentation — a spinning 3D ring of cards — kept in the repo but
+// unwired; it and the card grid were mutually exclusive (the carousel hid the
+// list via .has-3d-carousel).
 
 createTerminal(document.getElementById("terminal"));
-createGithub(document.getElementById("github"));
 
 // the hero waits for the loader curtain to lift, then animates in
 function revealHero() {
@@ -61,10 +64,8 @@ document.querySelectorAll(".reveal").forEach((el, i) => {
 });
 
 
-/* ── per-project hover tint ───────────────────────────────────────────── */
-document.querySelectorAll(".project[data-tint]").forEach((el) => {
-  el.style.setProperty("--tint", el.dataset.tint);
-});
+/* project card colour now comes from --accent, assigned per card by nth-child
+   in style.css, so there is no per-project tint to wire up here */
 
 /* ── counters ─────────────────────────────────────────────────────────── */
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
@@ -136,12 +137,19 @@ if (spySections.length) {
 }
 
 /* ── project card tilt + cursor-tracked spotlight ─────────────────────── */
-const TILT_MAX = 6; // degrees — kept subtle; this is a resume site, not a toy
+const TILT_MAX = 13; // degrees
+const TILT_SCALE = 1.04; // the lift that sells the card as picked up
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
+// [data-tilt] gets the spotlight *and* the 3D tilt; [data-spotlight] gets the
+// spotlight only. The opportunity cards are flush against each other in a
+// 1px-gap grid, so rotating them would break the shared seam — they track the
+// cursor with light instead of geometry.
 if (!reducedMotion && !coarsePointer) {
-  document.querySelectorAll("[data-tilt]").forEach((el) => {
+  document.querySelectorAll("[data-tilt], [data-spotlight]").forEach((el) => {
+    const tilts = el.hasAttribute("data-tilt");
+
     const onMove = (e) => {
       const r = el.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width; // 0..1
@@ -151,13 +159,27 @@ if (!reducedMotion && !coarsePointer) {
       el.style.setProperty("--mx", `${px * 100}%`);
       el.style.setProperty("--my", `${py * 100}%`);
 
+      if (!tilts) return;
+
       // tilt: rotateX responds to vertical position, rotateY to horizontal,
       // both centred on 0 so the card is flat at its own centre
       const rx = (0.5 - py) * TILT_MAX;
       const ry = (px - 0.5) * TILT_MAX;
-      el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      // no perspective() here — the list supplies it, so all the cards share
+      // one vanishing point instead of each bulging around its own centre
+      el.style.transform =
+        `rotateX(${rx}deg) rotateY(${ry}deg) scale3d(${TILT_SCALE}, ${TILT_SCALE}, 1)`;
+
+      // Glare runs perpendicular to the tilt axis and brightens as the cursor
+      // moves off-centre, so the sheen is strongest at the steepest tilt —
+      // which is where a real specular highlight would be.
+      const dx = px - 0.5;
+      const dy = py - 0.5;
+      el.style.setProperty("--glare-angle", `${(Math.atan2(dy, dx) * 180) / Math.PI + 90}deg`);
+      el.style.setProperty("--glare-op", Math.min(0.42, Math.hypot(dx, dy) * 0.95).toFixed(3));
     };
     const onLeave = () => {
+      if (!tilts) return;
       // real-time tracking must stay untransitioned or it visibly lags the
       // cursor; the snap-back on leave is the one moment a transition helps
       el.style.transition = "transform 0.5s var(--ease)";

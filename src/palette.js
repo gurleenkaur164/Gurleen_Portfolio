@@ -9,6 +9,12 @@ const COMMANDS = [
   { label: "Go to top", hint: "section", action: () => scrollToId("top") },
   { label: "Go to Work", hint: "section", action: () => scrollToId("work") },
   { label: "Go to About", hint: "section", action: () => scrollToId("about") },
+  { label: "Go to Tech Stack", hint: "section", action: () => scrollToId("stack") },
+  {
+    label: "Go to Open for Opportunities",
+    hint: "hiring · freelance",
+    action: () => scrollToId("opportunities"),
+  },
   { label: "Go to Contact", hint: "section", action: () => scrollToId("contact") },
   {
     label: "Copy email address",

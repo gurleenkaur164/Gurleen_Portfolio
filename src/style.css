@@ -1,21 +1,45 @@
 /* ==========================================================================
    Gurleen Kaur — portfolio
-   Palette: warm paper / ink / oxidised rust. Deliberately low-chroma:
-   one accent, everything else is a tint of the paper or the ink.
-   ========================================================================== */
 
+   COLOUR SYSTEM
+   Five accent hues (--c1..--c5), distributed so the page changes temperature
+   as you scroll rather than sitting on one note. `--rust` is the legacy token
+   the rest of the stylesheet already used; it is kept as a second name for
+   the current accent so those rules didn't all need rewriting — see the hue
+   distribution block below for why the two must always be set as a pair.
+
+   Light-theme accents are darkened to hold contrast against the paper; the
+   dark theme can afford the bright end of each hue. All ten clear WCAG AA for
+   body text (light 4.66–6.74, dark 6.99–11.80).
+   ========================================================================== */
 :root {
-  /* LIGHT default: soft blush paper, warm plum-black ink, one dusty-rose
-     accent. Warm and hand-mixed — a muted rose, not a hot-pink/AI gradient.
-     Everything else is a tint of these three. */
-  --paper: #f7ece9;
-  --paper-2: #f0dcd6;
-  --ink: #2b1f22;
-  --ink-70: rgba(43, 31, 34, 0.72);
-  --ink-45: rgba(43, 31, 34, 0.5);
-  --ink-18: rgba(43, 31, 34, 0.16);
-  --ink-08: rgba(43, 31, 34, 0.07);
-  --rust: #a8465c;
+  --paper: #fbfaf8;
+  --paper-2: #f1edf7;
+  --ink: #17132a;
+  --ink-70: rgba(23, 19, 42, 0.72);
+  --ink-45: rgba(23, 19, 42, 0.5);
+  --ink-18: rgba(23, 19, 42, 0.16);
+  --ink-08: rgba(23, 19, 42, 0.07);
+
+  --c1: #c8402a; /* coral   */
+  --c2: #6338ce; /* violet  */
+  --c3: #0b7c93; /* teal    */
+  --c4: #9a6508; /* amber   */
+  --c5: #07795a; /* mint    */
+
+  /* Defaults. These two must always be set as a pair — see the hue
+     distribution block for why an alias doesn't work. */
+  --accent: var(--c1);
+  --rust: var(--c1);
+
+  /* Duotone stops for the WebGL point-cloud portrait (src/portrait.js).
+     Unused while the hero is the caricature, but kept so that hero can be
+     wired back in without re-deriving them. Shadow sits well off the page
+     colour on purpose: her hair is the darkest region, and mapping it onto
+     the background would erase the silhouette. */
+  --portrait-shadow: #3b2a2e;
+  --portrait-mid: #a8465c;
+  --portrait-hi: #fdf6f3;
 
   --grain-blend: multiply;
   --grain-opacity: 0.035;
@@ -31,18 +55,72 @@
 
 /* ── dark theme: the espresso variant, opt-in via the toggle ───────────── */
 :root[data-theme="dark"] {
-  --paper: #100d0b;
-  --paper-2: #17130f;
-  --ink: #e8e3d9;
-  --ink-70: rgba(232, 227, 217, 0.66);
-  --ink-45: rgba(232, 227, 217, 0.42);
-  --ink-18: rgba(232, 227, 217, 0.16);
-  --ink-08: rgba(232, 227, 217, 0.07);
-  --rust: #c2703f;
+  --paper: #0a0a14;
+  --paper-2: #12121f;
+  --ink: #eeebf7;
+  --ink-70: rgba(238, 235, 247, 0.68);
+  --ink-45: rgba(238, 235, 247, 0.44);
+  --ink-18: rgba(238, 235, 247, 0.16);
+  --ink-08: rgba(238, 235, 247, 0.07);
+
+  /* the bright end of each hue — legible on near-black, and the saturation is
+     what stops a dark theme reading as grey */
+  --c1: #ff6b4a;
+  --c2: #a78bfa;
+  --c3: #22d3ee;
+  --c4: #fbbf24;
+  --c5: #34d399;
+
+  --portrait-shadow: #5b3529;
+  --portrait-mid: #c2703f;
+  --portrait-hi: #e8e3d9;
 
   --grain-blend: screen;
   --grain-opacity: 0.05;
 }
+
+/* ── hue distribution ─────────────────────────────────────────────────── */
+/* Two things about this block are load-bearing and were both wrong first go:
+
+   1. `--accent` and `--rust` are set TOGETHER, every time. A custom property
+      is substituted at computed-value time on the element it's declared on —
+      so `--rust: var(--accent)` at :root resolves to :root's accent once and
+      inherits that *resolved colour*. It does not re-resolve per descendant,
+      so overriding `--accent` alone changes nothing downstream.
+   2. Sections are addressed by id, not `:nth-of-type`. `main` holds a mix of
+      children (.hero, .ticker, .intro, .stats, .section), and `:nth-of-type`
+      counts every <section> regardless of class — so `.section:nth-of-type(1)`
+      asked for a section that is both `.section` and the first section, which
+      is `.hero`, and matched nothing at all.
+
+   The order alternates warm and cool so no two adjacent sections share a
+   temperature. */
+#work           { --accent: var(--c1); --rust: var(--c1); }
+#about          { --accent: var(--c2); --rust: var(--c2); }
+#stack          { --accent: var(--c3); --rust: var(--c3); }
+#recognition    { --accent: var(--c4); --rust: var(--c4); }
+#ask            { --accent: var(--c3); --rust: var(--c3); }
+#opportunities  { --accent: var(--c1); --rust: var(--c1); }
+#contact        { --accent: var(--c2); --rust: var(--c2); }
+
+/* the seven stack categories each get their own, cycling the five hues */
+.stack__grid > :nth-child(5n + 1) { --accent: var(--c1); --rust: var(--c1); }
+.stack__grid > :nth-child(5n + 2) { --accent: var(--c2); --rust: var(--c2); }
+.stack__grid > :nth-child(5n + 3) { --accent: var(--c3); --rust: var(--c3); }
+.stack__grid > :nth-child(5n + 4) { --accent: var(--c4); --rust: var(--c4); }
+.stack__grid > :nth-child(5n + 5) { --accent: var(--c5); --rust: var(--c5); }
+
+/* opportunity cards */
+.opps__grid > :nth-child(1) { --accent: var(--c1); --rust: var(--c1); }
+.opps__grid > :nth-child(2) { --accent: var(--c3); --rust: var(--c3); }
+.opps__grid > :nth-child(3) { --accent: var(--c2); --rust: var(--c2); }
+
+/* project cards */
+.projects > :nth-child(5n + 1) { --accent: var(--c1); --rust: var(--c1); }
+.projects > :nth-child(5n + 2) { --accent: var(--c5); --rust: var(--c5); }
+.projects > :nth-child(5n + 3) { --accent: var(--c2); --rust: var(--c2); }
+.projects > :nth-child(5n + 4) { --accent: var(--c4); --rust: var(--c4); }
+.projects > :nth-child(5n + 5) { --accent: var(--c3); --rust: var(--c3); }
 
 /* cross-fade themed colours in one sweep instead of a hard cut */
 :root.theme-anim,
@@ -50,7 +128,8 @@
 :root.theme-anim .nav,
 :root.theme-anim .section,
 :root.theme-anim .term,
-:root.theme-anim [class*="gh__"] {
+:root.theme-anim .stackset,
+:root.theme-anim .opp {
   transition: background-color 0.42s var(--ease), color 0.42s var(--ease),
     border-color 0.42s var(--ease);
 }
@@ -564,43 +643,82 @@ a.section__aside:hover {
 }
 
 /* ── hero ─────────────────────────────────────────────────────────────── */
+/* One viewport, and only this. Three columns — name, caricature, role — with
+   the figure in the middle column but free to overflow it, so she reads as
+   standing *between* the two blocks of type rather than boxed by them.
+   height (not min-height) is deliberate: nothing below may peek in. */
 .hero {
-  min-height: 100svh;
-  padding: clamp(6rem, 12vh, 9rem) var(--pad) 2.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
-}
-
-/* name left, portrait right — the portrait is the hero, not wallpaper */
-.hero__grid {
-  flex: 1;
+  position: relative;
+  /* dvh, not svh: svh is the height with mobile browser chrome *showing*, so
+     it leaves a strip of the next section visible once the URL bar collapses
+     — exactly the "nothing else on screen" this is supposed to guarantee.
+     svh first as the fallback for browsers without dvh. */
+  height: 100svh;
+  height: 100dvh;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  /* the centre column is deliberately the narrow one — the type needs the
+     width more than the caricature does, and she is allowed to overflow it */
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, clamp(12rem, 25vw, 25rem))
+    minmax(0, 1fr);
   align-items: center;
-  gap: clamp(1.5rem, 4vw, 4rem);
-  min-height: 0;
+  gap: clamp(0.5rem, 2vw, 2rem);
+  padding: clamp(5rem, 11vh, 7.5rem) var(--pad) clamp(5.5rem, 10vh, 7rem);
+  max-width: 1700px;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
-.hero__copy {
+/* container-type makes cqw resolve against THIS column, not the viewport.
+   That is the whole ballgame for the hero type: these blocks are ~28% of the
+   screen, so vw-based sizing overran them by 200px and `overflow: hidden`
+   silently truncated "GURLEEN" to "GURLE". */
+.hero__left,
+.hero__right {
   min-width: 0;
+  container-type: inline-size;
+  z-index: 1; /* type sits over the figure's glow */
+}
+
+.hero__left {
+  grid-column: 1;
+}
+
+.hero__right {
+  grid-column: 3;
+  text-align: right;
+}
+
+.hero__hello {
+  font-family: var(--mono);
+  font-size: clamp(0.68rem, 1vw, 0.8rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-45);
 }
 
 .hero__title {
   font-family: var(--serif);
-  font-weight: 700;
-  font-size: clamp(3.2rem, 9.5vw, 9.5rem);
-  line-height: 0.88;
+  font-weight: 800;
+  /* 11.5cqw is derived, not guessed: "GURLEEN" measures 8.09 em-widths in
+     Syne 800 uppercase at -0.04em tracking, so it fits a column of width W at
+     W/8.09 = 12.4cqw. 11.5 leaves headroom for font fallback before Syne
+     loads, which is wider. */
+  font-size: clamp(1.9rem, 11.5cqw, 5rem);
+  line-height: 0.9;
   letter-spacing: -0.04em;
-  margin: 1.25rem 0 2rem;
+  text-transform: uppercase;
+  margin-top: 0.7rem;
 }
 
+/* The reveal needs a mask the line can slide up out of, but it must only mask
+   VERTICALLY. `overflow: hidden` clips both axes, which is what beheaded
+   "GURLEEN" — clip-path holds the top/bottom edge and stays open sideways, so
+   any future overrun is visible rather than silently truncated. */
 .hero__title .line {
   display: block;
-  overflow: hidden;
+  clip-path: inset(0 -100vw 0 -100vw);
   padding-bottom: 0.06em; /* room for the descender in "Gurleen" */
 }
 
@@ -615,7 +733,7 @@ a.section__aside:hover {
 }
 
 .hero__title .line:nth-child(2) {
-  padding-left: 0.3em;
+  padding-left: 0.28em;
   color: var(--rust);
 }
 
@@ -624,93 +742,262 @@ a.section__aside:hover {
   transform: translateY(0);
 }
 
-.hero__role {
+/* ── "A Full Stack ___" with the trailing word on a loop ──────────────── */
+.hero__lead {
   font-family: var(--sans);
-  font-size: clamp(1rem, 1.6vw, 1.4rem);
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  padding-top: 1.5rem;
-  border-top: var(--rule);
+  font-weight: 500;
+  font-size: clamp(0.95rem, 1.9vw, 1.6rem);
+  letter-spacing: 0.02em;
+  color: var(--rust);
 }
 
-/* ── 3D avatar ────────────────────────────────────────────────────────── */
-.hero__portrait {
-  position: relative;
-  height: min(68vh, 620px);
-  min-height: 320px;
-  /* a soft warm disc floats the avatar off the paper */
-  background: radial-gradient(
-    46% 46% at 50% 42%,
-    color-mix(in srgb, var(--rust) 12%, transparent),
-    transparent 70%
-  );
+/* Sized for the LONGEST word in the roller, not the first one. "AI ENGINEER"
+   is ~11.9 em-widths, so it fits at W/11.9 = 8.4cqw. */
+.hero__roles {
+  font-family: var(--serif);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 8cqw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  margin-top: 0.35rem;
 }
 
-#avatar {
-  width: 100%;
-  height: 100%;
+/* The window is exactly one slot tall; the track steps up one slot at a
+   time. The last child repeats the first, so the reset at 100% lands on an
+   identical frame and the loop has no visible seam. */
+.roller {
+  --roll-h: 1.15em;
+  display: inline-block;
+  /* vertical-only mask, same reason as .hero__title .line */
+  clip-path: inset(0 -100vw 0 -100vw);
+  height: var(--roll-h);
+  color: var(--rust);
+}
+
+.roller__track {
+  display: flex;
+  flex-direction: column;
+  animation: roll 10.5s var(--ease) infinite;
+}
+
+.roller__track > span {
   display: block;
-  cursor: grab;
+  height: var(--roll-h);
+  line-height: var(--roll-h);
+  white-space: nowrap;
 }
 
-.hero__portrait-cap {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-45);
-  pointer-events: none;
+/* 4 slots => each step is 25% of the track's own height */
+@keyframes roll {
+  0%, 24%    { transform: translateY(0); }
+  30%, 57%   { transform: translateY(-25%); }
+  63%, 90%   { transform: translateY(-50%); }
+  96%, 100%  { transform: translateY(-75%); }
 }
 
-.hero__foot {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  padding-top: 1.75rem;
-  border-top: var(--rule);
-}
-
-.hero__blurb {
-  font-size: 0.95rem;
-  color: var(--ink-70);
-  max-width: 52ch;
-}
-
-.hero__scroll {
-  display: flex;
-  flex-shrink: 0;
+/* ── buttons ──────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
+  padding: 0.7rem 1.3rem;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
   font-family: var(--mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-45);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease),
+    border-color 0.35s var(--ease), transform 0.35s var(--ease);
 }
 
-.hero__scroll-line {
-  width: 46px;
-  height: 1px;
-  background: var(--ink-18);
+.btn:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.btn--solid {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.btn--solid:hover {
+  background: var(--rust);
+  border-color: var(--rust);
+  color: var(--paper);
+}
+
+/* live-status dot — the ring pulses outward, the core stays put */
+.btn__dot {
   position: relative;
-  overflow: hidden;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
-.hero__scroll-line::after {
+.btn__dot::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--ink);
-  animation: sweep 2.4s var(--ease) infinite;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ping 2s var(--ease) infinite;
 }
 
-@keyframes sweep {
-  0% { transform: translateX(-100%); }
-  60%, 100% { transform: translateX(100%); }
+@keyframes ping {
+  0%        { transform: scale(1); opacity: 0.55; }
+  70%, 100% { transform: scale(3); opacity: 0; }
+}
+
+/* ── the caricature ───────────────────────────────────────────────────── */
+/* Middle column, but bottom-aligned and allowed to grow past its column so
+   she overlaps the type slightly — the same "character standing between the
+   words" read as the reference. --px/--py are written by the parallax in
+   main.js and are 0 until the pointer moves. */
+/* The float lives on the wrapper and the parallax on the image, so the two
+   compose instead of overwriting each other — they are both transforms, and
+   one element can only have one. */
+.hero__figure {
+  grid-column: 2;
+  position: relative;
+  align-self: end;
+  justify-self: center;
+  width: clamp(16rem, 34vw, 34rem);
+  display: flex;
+  justify-content: center;
+  animation: float 7s ease-in-out infinite;
+}
+
+/* the glow she stands in — sized off the figure, so it scales with her */
+.hero__figure::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 128%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--rust) 26%, transparent),
+    transparent 62%
+  );
+  filter: blur(12px);
+  z-index: -1;
+}
+
+.hero__char {
+  width: 100%;
+  height: auto;
+  max-height: 74svh;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+  transform: translate3d(
+    calc(var(--px, 0) * 14px),
+    calc(var(--py, 0) * 10px),
+    0
+  );
+  will-change: transform;
+  /* she is lit from the page, so the shadow grounds her against it */
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.28));
+  transition: opacity 0.5s var(--ease);
+}
+
+/* ── WebGL takeover ───────────────────────────────────────────────────── */
+/* The canvas overlays the img at the same box. Once the 3D scene has its
+   maps built, .is-3d fades the flat one out — swapping them any earlier
+   shows a blank hole while the distance transform runs. */
+.hero__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease);
+}
+
+.hero__figure.is-3d .hero__canvas {
+  opacity: 1;
+}
+
+.hero__figure.is-3d .hero__char {
+  opacity: 0;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.1%); }
+}
+
+/* ── scroll arrow ─────────────────────────────────────────────────────── */
+/* Fades in after the name has landed — "and then an arrow comes". */
+.hero__arrow {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.5rem, 3.5vh, 2.75rem);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ink-45);
+  text-decoration: none;
+  z-index: 2;
+  opacity: 0;
+  animation: arrow-in 0.9s var(--ease) 2.1s forwards;
+  transition: color 0.35s var(--ease);
+}
+
+.hero__arrow:hover {
+  color: var(--rust);
+}
+
+.hero__arrow-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.hero__arrow svg {
+  animation: nudge 1.9s var(--ease) infinite;
+}
+
+@keyframes arrow-in {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); opacity: 0.75; }
+  50%      { transform: translateY(7px); opacity: 1; }
+}
+
+/* ── intro strip: where the arrow lands ───────────────────────────────── */
+.intro {
+  padding: clamp(3.5rem, 9vh, 6rem) var(--pad) 0;
+  max-width: 1700px;
+  margin: 0 auto;
+}
+
+.intro__blurb {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.15rem, 2.4vw, 1.9rem);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  max-width: 40ch;
+  color: var(--ink-70);
 }
 
 /* ── ticker ───────────────────────────────────────────────────────────── */
@@ -883,6 +1170,10 @@ a.section__aside:hover {
   width: 100%;
   height: clamp(550px, 70vh, 850px);
   margin-bottom: 3rem;
+  /* three.js writes an inline pixel width on the canvas, which beats the
+     stylesheet's width:100% — without this the canvas can hand the whole page
+     a horizontal scrollbar between resize ticks */
+  overflow: hidden;
 }
 
 .carousel-wrap canvas {
@@ -904,36 +1195,54 @@ a.section__aside:hover {
   pointer-events: none;
 }
 
-/* hide the flat list when the 3D carousel is active */
-.has-3d-carousel .projects {
-  display: none;
-}
-
-/* ── projects (flat fallback) ────────────────────────────────────────── */
+/* ── projects ─────────────────────────────────────────────────────────── */
+/* Cards, not rows. A tilt on a 1300px-wide row reads as the page skewing;
+   the effect only works on something roughly card-shaped. */
 .projects {
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: clamp(0.9rem, 1.8vw, 1.5rem);
 }
 
 .project {
-  border-bottom: var(--rule);
-}
-
-.project:first-child {
-  border-top: var(--rule);
+  display: flex; /* so the card can stretch to the row height */
 }
 
 .project__link {
-  display: grid;
-  grid-template-columns: 4rem minmax(0, 1fr) 3rem;
-  gap: 2rem;
-  align-items: start;
-  padding: clamp(1.75rem, 3.5vw, 2.75rem) 0;
-  transition: padding 0.6s var(--ease), color 0.5s var(--ease);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  padding: clamp(1.5rem, 2.4vw, 2rem);
+  border: var(--rule);
+  border-radius: 14px;
+  background: var(--paper);
+  transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
 }
 
 .project__link:hover {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow:
+    0 26px 55px -24px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 12px 28px -18px rgba(0, 0, 0, 0.4);
+}
+
+/* Number and arrow share a row of their own. The arrow used to be absolutely
+   positioned top-right, which put it directly on top of the project name —
+   every one of the five collided. A flow row can't overlap. */
+.project__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.project__body {
+  container-type: inline-size;
+  width: 100%;
 }
 
 .project__no {
@@ -944,14 +1253,22 @@ a.section__aside:hover {
   transition: color 0.5s var(--ease);
 }
 
+/* cqw against .project__body, not vw. At 3.4vw this rendered 43px inside a
+   420px card, so "CampusBazaar" ran the full width and straight under the
+   arrow. Long names are allowed to wrap; what they must not do is overrun. */
 .project__name {
   font-family: var(--serif);
-  font-weight: 600;
-  font-size: clamp(1.6rem, 3.4vw, 2.7rem);
-  line-height: 1.05;
+  font-weight: 700;
+  font-size: clamp(1.3rem, 9cqw, 1.95rem);
+  line-height: 1.08;
   letter-spacing: -0.025em;
   margin-bottom: 0.7rem;
+  overflow-wrap: anywhere; /* a single unbroken name can't push the card wide */
   transition: color 0.5s var(--ease);
+}
+
+.project__link:hover .project__name {
+  color: var(--accent);
 }
 
 .project__desc {
@@ -983,13 +1300,15 @@ a.section__aside:hover {
 .project__arrow {
   font-size: 1.1rem;
   color: var(--ink-45);
-  justify-self: end;
-  padding-top: 0.4rem;
   transition: transform 0.55s var(--ease), color 0.5s var(--ease);
 }
 
+/* The translateZ that lifts this off the card face lives in the tilt block
+   below. It must be repeated here: `transform` is one property, so a hover
+   rule that sets only the nudge silently drops the depth. */
 .project__link:hover .project__arrow {
-  transform: translate(4px, -4px);
+  transform: translateZ(60px) translate(4px, -4px);
+  color: var(--accent);
 }
 
 /* the tint is written per-project from JS via --tint */
@@ -1052,6 +1371,80 @@ a.section__aside:hover {
   line-height: 1.7;
 }
 
+/* ── tech stack ───────────────────────────────────────────────────────── */
+/* Same flush-cell construction as .opps__grid: the 1px "gap" is the parent's
+   background showing through, which gives shared rules between cells without
+   doubling borders. */
+.stack__grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1px;
+  background: var(--ink-18);
+  border: var(--rule);
+}
+
+.stackset {
+  position: relative;
+  padding: 1.75rem clamp(1.1rem, 1.8vw, 1.6rem);
+  background: var(--paper);
+}
+
+/* cursor-tracked spotlight; main.js writes --mx/--my for [data-spotlight] */
+.stackset::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    14rem 14rem at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--rust) 13%, transparent),
+    transparent 70%
+  );
+  transition: opacity 0.45s var(--ease);
+}
+
+.stackset:hover::before {
+  opacity: 1;
+}
+
+.stackset > * {
+  position: relative; /* above the spotlight */
+}
+
+.stackset__name {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 1rem;
+}
+
+.stackset__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stackset__list li {
+  padding: 0.32rem 0.65rem;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  color: var(--ink-70);
+  transition: border-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+.stackset:hover .stackset__list li {
+  border-color: color-mix(in srgb, var(--rust) 40%, transparent);
+  color: var(--ink);
+}
+
 /* ── awards ───────────────────────────────────────────────────────────── */
 .awards {
   list-style: none;
@@ -1095,6 +1488,162 @@ a.section__aside:hover {
   font-size: 0.68rem;
   color: var(--ink-45);
   text-align: right;
+}
+
+/* ── open for opportunities ───────────────────────────────────────────── */
+.opps__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+/* same two-part dot as .btn__dot, but always tinted rust rather than
+   inheriting the button's foreground */
+.opps__pulse {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rust);
+  flex-shrink: 0;
+}
+
+.opps__pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--rust);
+  animation: ping 2s var(--ease) infinite;
+}
+
+.opps__lede {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  max-width: 34ch;
+  margin-bottom: 3rem;
+}
+
+.opps__lede strong {
+  font-weight: 700;
+  color: var(--rust);
+}
+
+.opps__grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1px;
+  background: var(--ink-18); /* the gap *is* the rule between cards */
+  border: var(--rule);
+}
+
+.opp {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 2rem clamp(1.25rem, 2vw, 1.9rem) 1.75rem;
+  background: var(--paper);
+  transform-style: preserve-3d;
+  transition: background 0.5s var(--ease);
+}
+
+/* the cursor-tracked spotlight [data-tilt] writes --mx/--my for */
+.opp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    18rem 18rem at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--rust) 14%, transparent),
+    transparent 70%
+  );
+  transition: opacity 0.45s var(--ease);
+}
+
+.opp:hover::before {
+  opacity: 1;
+}
+
+.opp > * {
+  position: relative; /* keep content above the spotlight */
+}
+
+.opp__no {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--rust);
+}
+
+.opp__name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.opp__desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink-70);
+}
+
+.opp__tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto; /* tags and meta pin to the bottom, so cards align */
+  padding-top: 0.5rem;
+}
+
+.opp__tags li {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-70);
+}
+
+.opp__meta {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  padding-top: 0.75rem;
+  border-top: var(--rule);
+}
+
+.opps__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+
+.opps__note {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-45);
 }
 
 /* ── contact ──────────────────────────────────────────────────────────── */
@@ -1185,173 +1734,6 @@ a.section__aside:hover {
   font-size: clamp(1.05rem, 2.4vw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.015em;
-}
-
-/* ── github / open source ─────────────────────────────────────────────── */
-.gh__grid {
-  display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
-  gap: clamp(2rem, 5vw, 4rem);
-  align-items: start;
-}
-
-.gh__stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--ink-18);
-  border: 1px solid var(--ink-18);
-}
-
-.gh__stat {
-  background: var(--paper);
-  padding: clamp(1.5rem, 3vw, 2.4rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-height: 7rem;
-}
-
-.gh__num {
-  font-family: var(--serif);
-  font-weight: 700;
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--rust);
-  font-variant-numeric: tabular-nums;
-}
-
-.gh__label {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-45);
-}
-
-.gh__skeleton {
-  position: relative;
-  overflow: hidden;
-}
-
-.gh__skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, var(--ink-08), transparent);
-  transform: translateX(-100%);
-  animation: shimmer 1.4s var(--ease) infinite;
-}
-
-@keyframes shimmer {
-  to { transform: translateX(100%); }
-}
-
-.gh__panel-title,
-.gh__repos-title {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--rust);
-  margin-bottom: 1rem;
-}
-
-.gh__langs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.gh__lang {
-  display: grid;
-  grid-template-columns: 6.5rem 1fr;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.gh__lang-name {
-  font-size: 0.82rem;
-  color: var(--ink-70);
-}
-
-.gh__lang-bar {
-  height: 4px;
-  background: var(--ink-08);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.gh__lang-bar > span {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: var(--rust);
-  border-radius: 999px;
-  animation: lang-grow 0.9s var(--ease) forwards;
-}
-
-@keyframes lang-grow {
-  from { transform: scaleX(0); transform-origin: left; }
-}
-
-.gh__repos {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--ink-18);
-  border: 1px solid var(--ink-18);
-  margin-top: 2.5rem;
-}
-
-.gh__repo {
-  background: var(--paper);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  transition: background 0.4s var(--ease);
-}
-
-.gh__repo:hover {
-  background: var(--paper-2);
-}
-
-.gh__repo-name {
-  font-family: var(--serif);
-  font-size: 1.15rem;
-  font-weight: 400;
-  color: var(--ink);
-}
-
-.gh__repo-desc {
-  font-size: 0.85rem;
-  color: var(--ink-70);
-  line-height: 1.5;
-}
-
-.gh__repo-meta {
-  font-family: var(--mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-45);
-  margin-top: 0.3rem;
-}
-
-.gh__error {
-  grid-column: 1 / -1;
-  font-size: 0.9rem;
-  color: var(--ink-70);
-  padding: 1rem 0;
-}
-
-.gh__error a {
-  color: var(--rust);
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 /* ── terminal ─────────────────────────────────────────────────────────── */
@@ -1469,32 +1851,61 @@ a.section__aside:hover {
 
 /* ── responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
+  /* Single column: name, then role, then the caricature filling what's left.
+     Both blocks go left-aligned — a right-aligned role reads as a mistake
+     once it is no longer balancing a left column across the page. */
   .hero {
-    padding-top: 5.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-content: start;
+    gap: 0;
+    padding-top: clamp(4.5rem, 13vh, 6rem);
   }
 
-  .hero__grid {
-    grid-template-columns: 1fr;
-    align-content: center;
+  /* Rows are assigned explicitly rather than left to auto-placement: the
+     figure is second in the DOM (it belongs between the two type blocks on
+     desktop), so auto-placement would hand the flexible row to the role text
+     and let the caricature overflow the viewport. */
+  .hero__left,
+  .hero__right {
+    grid-column: 1;
+    text-align: left;
   }
 
-  /* portrait above the name on narrow screens */
-  .hero__portrait {
-    order: -1;
-    height: min(38vh, 320px);
-    min-height: 220px;
+  .hero__left {
+    grid-row: 1;
   }
 
-  .hero__portrait-cap {
-    display: none;
+  .hero__right {
+    grid-row: 2;
+    margin-top: 1.1rem;
   }
 
+  /* the figure takes whatever height is left and shrinks to fit it */
+  .hero__figure {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: stretch;
+    align-items: flex-end;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .hero__char {
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* cqw here too. vw sizing overran the single column by 60px and clipped
+     "GURLEEN" all over again — the column is not the viewport, it's the
+     viewport minus two lots of --pad. */
   .hero__title {
-    font-size: clamp(3rem, 15vw, 5rem);
+    font-size: clamp(1.9rem, 11cqw, 4rem);
   }
 
-  .hero__scroll {
-    display: none;
+  .hero__roles {
+    font-size: clamp(1.3rem, 8.5cqw, 2.6rem);
   }
 
   .stats {
@@ -1517,15 +1928,6 @@ a.section__aside:hover {
     display: none;
   }
 
-  .has-3d-carousel .projects {
-    display: block;
-  }
-
-  .project__link {
-    grid-template-columns: 2.5rem minmax(0, 1fr) 1.5rem;
-    gap: 1rem;
-  }
-
   .award {
     grid-template-columns: 3.5rem minmax(0, 1fr);
     row-gap: 0.35rem;
@@ -1539,14 +1941,6 @@ a.section__aside:hover {
   .clink {
     flex-direction: column;
     gap: 0.4rem;
-  }
-
-  .gh__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gh__repos {
-    grid-template-columns: 1fr;
   }
 
   .section__aside {
@@ -1663,12 +2057,17 @@ a.section__aside:hover {
   transition: transform 0.35s var(--ease);
 }
 
-/* ── project tilt + spotlight ─────────────────────────────────────────── */
-/* tilt is a plain transform set by JS (perspective lives on the list so
-   children keep their own stacking/hover context); the spotlight is a
-   radial gradient tracking the cursor, tinted per-project via --tint. */
+/* ── project 3D tilt ──────────────────────────────────────────────────── */
+/* Perspective lives on the list so every card shares one vanishing point —
+   put it on the card itself and each one gets its own, which makes a row of
+   them look like they're bulging independently.
+   JS sets the transform and writes --mx/--my (spotlight) and --glare-* .
+   NOTE: no `overflow: hidden` on .project__link. It would clip the glare
+   neatly, but it also forces `transform-style: preserve-3d` to flatten, and
+   the translateZ layers below would silently stop working. The glare is
+   clipped by its own border-radius instead. */
 .projects {
-  perspective: 1400px;
+  perspective: 1200px;
 }
 
 .project__link {
@@ -1677,16 +2076,17 @@ a.section__aside:hover {
   will-change: transform;
 }
 
+/* cursor-tracked spotlight, tinted per project via --tint */
 .project__link::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
-  border-radius: 8px;
+  z-index: 0;
+  border-radius: inherit;
   opacity: 0;
   background: radial-gradient(
     320px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, var(--tint, var(--rust)) 16%, transparent),
+    color-mix(in srgb, var(--tint, var(--rust)) 18%, transparent),
     transparent 70%
   );
   transition: opacity 0.4s var(--ease);
@@ -1697,8 +2097,63 @@ a.section__aside:hover {
   opacity: 1;
 }
 
+/* Specular sheen. The gradient angle follows the cursor, so the highlight
+   sweeps across the card the way light would off a tilted surface — this is
+   the part that sells it as a physical object rather than a skewed div. */
+.project__glare {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    var(--glare-angle, 130deg),
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  transition: opacity 0.4s var(--ease);
+}
+
+.project__link:hover .project__glare {
+  opacity: var(--glare-op, 0.25);
+}
+
+/* Depth. Each layer is lifted a different distance off the card face, so
+   they separate as it tilts — the parallax half of "parallax tilt". Kept
+   small on purpose; past ~60px the text visibly swims against the border. */
+.project__no,
+.project__body,
+.project__arrow {
+  position: relative;
+  z-index: 2;
+  transform-style: preserve-3d;
+}
+
+.project__top   { transform: translateZ(30px); }
+.project__no    { transform: translateZ(10px); }
+.project__name  { transform: translateZ(58px); }
+.project__desc  { transform: translateZ(30px); }
+.project__tags  { transform: translateZ(42px); }
+.project__arrow { transform: translateZ(60px); }
+
 @media (prefers-reduced-motion: reduce), (pointer: coarse) {
   .project__link {
     transform: none !important;
+  }
+
+  /* the lift only reads while the card is tilting; flat, it just blurs text */
+  .project__no,
+  .project__name,
+  .project__desc,
+  .project__tags,
+  .project__arrow {
+    transform: none;
+  }
+
+  .project__glare {
+    display: none;
   }
 }

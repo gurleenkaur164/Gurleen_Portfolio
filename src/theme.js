@@ -1,13 +1,13 @@
 /**
  * Light / dark theme.
  *
- * Dark is the default — it was a deliberate choice (the portrait glows against
- * espresso), so a first-time visitor sees it as designed. Light revives the
- * original paper/ink palette. Preference persists; the very first visit also
- * respects the OS `prefers-color-scheme` if the user has never chosen here.
+ * Light is the default — warm paper is the intended look; the espresso dark
+ * theme is opt-in. Preference persists once a visitor picks one.
  *
- * `onChange` fires after every switch so the WebGL portrait can re-tone — its
- * duotone colours live in CSS variables, so it just re-reads them.
+ * `onChange` fires after every switch, for anything that has to re-read a
+ * themed CSS variable rather than inheriting it. Nothing needs it while the
+ * hero is a plain <img>; the WebGL portrait did (its duotone stops live in
+ * --portrait-*), so the hook stays for when that gets wired back in.
  */
 const KEY = "gk-theme";
 
